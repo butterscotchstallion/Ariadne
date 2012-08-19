@@ -28,7 +28,8 @@ class Post extends Model
                   JOIN threads t ON t.id = p.thread_id
                   WHERE 1=1
                   AND p.forum_id  = :forumID
-                  AND p.thread_id = :threadID';
+                  AND p.thread_id = :threadID
+                  ORDER BY p.created_at';
         
         return $this->fetchAll($query, array(':forumID'  => $forumID,
                                              ':threadID' => $threadID));

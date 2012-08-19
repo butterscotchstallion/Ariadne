@@ -34,4 +34,7 @@ $app->register(new Silex\Provider\TwigServiceProvider(), array(
     'twig.path' => VIEW_ROOT
 ));
 
+
+$app->register(new Silex\Provider\SessionServiceProvider());
+
 require 'Routes.php';

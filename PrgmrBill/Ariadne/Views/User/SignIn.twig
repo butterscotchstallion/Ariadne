@@ -1,0 +1,36 @@
+{% include 'Header.twig' %}
+
+<div class="well" id="loginBox">
+    <form method="post" action="" class="validateMe">
+        <div class="control-block">
+            <label class="control-label" for="userName"><i class="icon-user"></i> Username</label>
+            
+            <div class="controls">
+                <input type="text" 
+                       name="user[name]" 
+                       id="userName" 
+                       maxlength="45"
+                       class="required">
+            </div>
+        </div>
+        
+        <div class="control-block">
+            <label class="control-label" for="userPassword"><i class="icon-lock"></i> Password</label>
+            
+            <div class="controls">
+                <input type="password" 
+                       name="user[password]" 
+                       id="userPassword" 
+                       maxlength="255"
+                       class="required">
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success"><i class="icon-white icon-user"></i> Sign In</button>
+        </div>
+    </form>
+</div>
+
+
+{% include 'Footer.twig' %}
