@@ -9,6 +9,15 @@ use Ariadne\Models\Model;
 
 class Thread extends Model
 {
+    private $post;
+    
+    function __construct($connection)
+    {
+        $this->post = new Post($connection);
+        
+        parent::__construct($connection);
+    }
+    
     function getAll($forumID)
     {
         $query = 'SELECT t.id,
@@ -18,9 +27,26 @@ class Thread extends Model
                   WHERE 1=1
                   AND t.forum_id = :forumID';
         
-        return $this->fetchAll($query, array(':forumID' => $forumID));
+        $result = $this->fetchAll($query, array(':forumID' => $forumID));
+        
+        if ($result) {
+            // Lookup array of all post counts
+            $postCounts = $this->post->getPostCounts();
+            
+            foreach ($result as $key => $t) {
+                // If this value is set, there is at least one post
+                // If not, there are no posts in that thread
+                $result[$key]['postCount'] = isset($postCounts[$t['id']]) ? $postCounts[$t['id']] : 0;
+            }
+        }
+        
+        return $result;
     }
     
+    /**
+     * Used to determine how many threads exist in a forum
+     *
+     */
     function getThreadCounts()
     {
         $query = "SELECT COUNT(*) as threadCount,
@@ -33,11 +59,8 @@ class Thread extends Model
         $result = $this->fetchAll($query);
         $counts = array();
         
-        //print_r($result);
-        
         if ($result) {
             foreach ($result as $key => $f) {
-                //print_r($f);
                 $counts[$f['id']] = $f['threadCount'];
             }
         }

@@ -13,7 +13,7 @@
         {% for t in threads %} 
             <tr>
                 <td><a href="/f/{{ forumID }}/t/{{ t.id }}">{{ t.title|e }}</a></td>
-                <td>0</td>  
+                <td>{{ t.postCount }}</td>  
             </tr> 
         {% endfor %}  
     </tbody>

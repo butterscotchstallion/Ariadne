@@ -36,22 +36,19 @@ class Post extends Model
     
     function getPostCounts()
     {
-        $query = "SELECT COUNT(*) as threadCount,
-                         f.id
-                  FROM threads t
-                  LEFT JOIN forums f ON f.id = t.forum_id
+        $query = "SELECT COUNT(*) as postCount,
+                         p.thread_id AS threadID
+                  FROM posts p
+                  JOIN threads t ON t.id = p.thread_id
                   WHERE 1=1
-                  GROUP BY f.id";
-                  
+                  GROUP BY p.thread_id";
+        
         $result = $this->fetchAll($query);
         $counts = array();
         
-        //print_r($result);
-        
         if ($result) {
-            foreach ($result as $key => $f) {
-                //print_r($f);
-                $counts[$f['id']] = $f['threadCount'];
+            foreach ($result as $key => $p) {
+                $counts[$p['threadID']] = $p['postCount'];
             }
         }
         

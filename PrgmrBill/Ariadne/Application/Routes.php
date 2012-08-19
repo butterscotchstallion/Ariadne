@@ -23,13 +23,13 @@ $app->get('/', function(Silex\Application $app, Request $req) {
 
 // Thread list
 $app->get('/f/{id}', function(Silex\Application $app, Request $req, $id = 0) {
-    
-    if (!$id) {
-        $app->abort(404, "Forum $id does not exist.");
-    }
-    
+ 
     $f       = new Forum($app['db']);
     $forum   = $f->getForumByID($id);
+     
+    if (!$forum) {
+        $app->abort(404, "Forum does not exist.");
+    }
     
     $t       = new Thread($app['db']);
     $threads = $t->getAll($id);
@@ -44,15 +44,19 @@ $app->get('/f/{id}', function(Silex\Application $app, Request $req, $id = 0) {
 // Post list
 $app->get('/f/{forumID}/t/{threadID}', function(Silex\Application $app, Request $req, $forumID = 0, $threadID = 0) {
     
-    if (!$forumID) {
-        $app->abort(404, "Forum $forumID does not exist.");
-    }
-    
     $f       = new Forum($app['db']);
     $forum   = $f->getForumByID($forumID);
     
+    if (!$forumID) {
+        $app->abort(404, "Forum does not exist.");
+    }
+    
     $t       = new Thread($app['db']);
     $thread  = $t->getThreadByID($threadID);
+    
+    if (!$thread) {
+        $app->abort(404, "Thread does not exist.");
+    }
     
     $p       = new Post($app['db']);
     $posts   = $p->getAll($forumID, $threadID);

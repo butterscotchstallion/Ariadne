@@ -14,7 +14,7 @@
                 <tr>                
                     <td class="postCreatedBlock">
                         <a href="/u/{{ p.createdBy }}"><img src="/Assets/Images/User/{{ p.createdByUserImage }}"></a>
-                        <a href="/u/{{ p.createdBy }}">{{ p.createdByUser|e }}</a>
+                        <a href="/u/{{ p.createdBy }}">{{ p.createdByUser|e }}</a> &bull; {{ p.createdAt }}
                     </td>  
                     <td class="postBodyBlock">{{ p.body|e }}</td>
                 </tr> 
