@@ -43,6 +43,20 @@ class Thread extends Model
         return $result;
     }
     
+    function getThreadTitlesByAuthor($userID)
+    {
+        $q = 'SELECT t.id,
+                     t.title,
+                     t.created_at AS createdAt,
+                     t.forum_id AS forumID
+              FROM threads t
+              WHERE 1=1
+              AND t.created_by = :userID
+              ORDER BY t.created_at';
+              
+        return $this->fetchAll($q, array(':userID' => $userID));
+    }
+    
     /**
      * Used to determine how many threads exist in a forum
      *
@@ -66,6 +80,18 @@ class Thread extends Model
         }
         
         return $counts;
+    }
+    
+    function getCreatedThreadCount($userID)
+    {
+        $q = "SELECT COUNT(*) AS threadCount
+              FROM threads t
+              WHERE 1=1
+              AND t.created_by = :userID";
+              
+        $result = $this->fetch($q, array(':userID' => (int) $userID));
+        
+        return $result ? $result['threadCount'] : 0;
     }
     
     function getThreadByID($id)

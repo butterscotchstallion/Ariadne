@@ -40,7 +40,7 @@ $app->get('/f/{id}', function(Silex\Application $app, Request $req, $id = 0) {
         'forumID'    => $forum['id'],
         'threads'    => $threads
     ));
-});
+})->assert('id', "\d+");
 
 // Post list
 $app->get('/f/{forumID}/t/{threadID}', function(Silex\Application $app, Request $req, $forumID = 0, $threadID = 0) {
@@ -70,15 +70,27 @@ $app->get('/f/{forumID}/t/{threadID}', function(Silex\Application $app, Request 
         'forumID'     => $forumID,
         'posts'       => $posts
     ));
-});
+})->assert('forumID',  "\d+")
+  ->assert('threadID', "\d+");
 
 // User profile
-$app->get('/u/{id}', function(Silex\Application $app, Request $req) {
+$app->get('/u/{id}', function(Silex\Application $app, Request $req, $id = 0) {
+    
+    $u    = new User($app['db']);
+    $user = $u->getUserByID($id);
+    
+    if (!$user) {
+        return $app->abort(404, 'User not found'); 
+    }
+    
+    $t        = new Thread($app['db']);
+    $threads = $t->getThreadTitlesByAuthor($id);
     
     return $app['twig']->render('User/Profile.twig', array(
-        
+        'user'    => $user,
+        'threads' => $threads
     ));
-});
+})->assert('id', "\d+");
 
 // Sign in
 $app->get('/u/sign-in', function(Silex\Application $app, Request $req) {
@@ -122,4 +134,4 @@ $app->post('/u/sign-in', function(Silex\Application $app, Request $req) {
     return $app->redirect('/u/sign-in');
 });
 
-
+$app['twig']->addGlobal('signedIn', $app['session']->get('user'));

@@ -1,6 +1,12 @@
 {% include 'Header.twig' %}
 
+<h1>{{ user.name|e }}</h1>
 
-
+<h2>Threads</h2>
+<ul>
+    {% for t in threads %}
+        <li><a href="/f/{{ t.forumID }}/t/{{ t.id }}" title="Created at {{ t.createdAt }}">{{ t.title|e }}</a></li>
+    {% endfor %}
+</ul>
 
 {% include 'Footer.twig' %}
