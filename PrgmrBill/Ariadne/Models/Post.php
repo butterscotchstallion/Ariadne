@@ -13,7 +13,6 @@ class Post extends Model
     {
         $query = 'SELECT p.id,
                          p.body,
-                         p.title,
                          p.created_at AS createdAt,
                          p.created_by AS createdBy,
                          p.forum_id AS forumID,
@@ -54,5 +53,24 @@ class Post extends Model
         }
         
         return $counts;
+    }
+    
+    function add(array $post)
+    {
+        $q = "INSERT INTO posts(forum_id, 
+                                thread_id, 
+                                created_at, 
+                                created_by,
+                                body)
+              VALUES(:forumID,
+                     :threadID,
+                     NOW(),
+                     :createdBy,
+                     :body)";
+        
+        return $this->save($q, array(':forumID'   => $post['forumID'],
+                                     ':threadID'  => $post['threadID'],
+                                     ':createdBy' => $post['createdBy'],
+                                     ':body'      => $post['body']));
     }
 }

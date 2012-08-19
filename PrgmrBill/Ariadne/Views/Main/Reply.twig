@@ -1,0 +1,13 @@
+
+<div class="well" id="replyBlock">
+    <form method="post" action="/f/{{ forumID }}/t/{{ threadID }}/reply" class="validateMe">
+        <input type="hidden" name="reply[forumID]" value="{{ forumID }}">
+        <input type="hidden" name="reply[threadID]" value="{{ threadID }}">
+        
+        <textarea name="reply[body]" class="span8 required"></textarea>
+        
+        <div class="clearfix">
+            <button type="submit" class="btn btn-success"><i class="icon-white icon-pencil"></i> Reply</button>
+        </div>
+    </form>
+</div>

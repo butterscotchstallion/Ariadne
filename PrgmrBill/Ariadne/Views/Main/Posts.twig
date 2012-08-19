@@ -11,7 +11,7 @@
         </thead>
         <tbody>
             {% for p in posts %} 
-                <tr>                
+                <tr id="post{{ p.id }}">                
                     <td class="postCreatedBlock">
                         <a href="/u/{{ p.createdBy }}"><img src="/Assets/Images/User/{{ p.createdByUserImage }}"></a>
                         <a href="/u/{{ p.createdBy }}">{{ p.createdByUser|e }}</a> &bull; {{ p.createdAt }}
@@ -21,8 +21,13 @@
             {% endfor %}
         </tbody>
     </table>
+    
 {% else %}
     No posts
 {% endif %}
 
+{% if signedIn %}
+    {% include 'Main/Reply.twig' %}
+{% endif %}
+    
 {% include 'Footer.twig' %}

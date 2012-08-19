@@ -17,11 +17,13 @@
 </head>
 <body>
 
-<div class="container">
+<div class="container" id="container">
     <div class="row pull-right clearfix" id="topBar">
         <div id="signInArea">
             {% if signedIn %}
-                <a href="/u/sign-in" class="btn btn-danger"><i class="icon-white icon-off"></i> Sign Out</a>
+                <form method="post" action="/u/sign-out" style="margin-bottom:0">
+                    <button type="submit" class="btn btn-danger"><i class="icon-white icon-off"></i> Sign Out</button>
+                </form>
             {% else %}
                 <a href="/u/sign-in" class="btn btn-success"><i class="icon-white icon-user"></i> Sign In</a>
             {% endif %}

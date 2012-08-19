@@ -73,6 +73,22 @@ $app->get('/f/{forumID}/t/{threadID}', function(Silex\Application $app, Request 
 })->assert('forumID',  "\d+")
   ->assert('threadID', "\d+");
 
+// New post
+$app->post('/f/{forumID}/t/{threadID}/reply', function(Silex\Application $app, Request $req, $forumID, $threadID) {
+    
+    $post               = $req->get('reply');
+    
+    $user              = $app['session']->get('user');
+    $post['createdBy'] = $user['id'];
+    
+    $p      = new Post($app['db']);
+    $postID = $p->add($post);
+    
+    return $app->redirect(sprintf('/f/%d/t/%d#post%d', $forumID, $threadID, $postID));
+    
+})->assert('forumID', "\d+")
+  ->assert('threadID', "\d+");
+
 // User profile
 $app->get('/u/{id}', function(Silex\Application $app, Request $req, $id = 0) {
     
@@ -98,6 +114,16 @@ $app->get('/u/sign-in', function(Silex\Application $app, Request $req) {
     return $app['twig']->render('User/SignIn.twig', array(
         
     ));
+});
+
+// Sign out
+$app->post('/u/sign-out', function(Silex\Application $app, Request $req) {
+    
+    if ($app['session']->has('user')) {
+        $app['session']->remove('user');
+    }
+    
+    return $app->redirect('/u/sign-in');
 });
 
 // Authenticate

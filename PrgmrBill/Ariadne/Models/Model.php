@@ -53,10 +53,10 @@ abstract class Model
         if ($stmt) {
             // Insert statement; return primary key
             if (strpos(strtolower($query), 'insert') === 0) {
-                $result = $this->getConnection()->lastInsertId();
+                $result = (int) $this->getConnection()->lastInsertId();
             } else {
                 // State changing; return rows affected
-                $result = $stmt->rowCount();
+                $result = (int) $stmt->rowCount();
             }
         } 
         
