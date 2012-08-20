@@ -6,11 +6,19 @@
 use Symfony\Component\HttpFoundation\Request,
     Symfony\Component\HttpFoundation\Response,
     Symfony\Component\HttpFoundation\RedirectResponse,
+    Symfony\Component\Validator\Constraints as Assert,
     Ariadne\Models\Forum,
     Ariadne\Models\Thread,
     Ariadne\Models\Post,
     Ariadne\Models\User;
     
+    
+$mustBeSignedIn = function (Request $request) use ($app) {
+    if (!$app['session']->has('user')) {
+        return $app->redirect('/u/sign-in');
+    }
+};
+
 // Forum list
 $app->get('/', function(Silex\Application $app, Request $req) {
 
@@ -18,7 +26,11 @@ $app->get('/', function(Silex\Application $app, Request $req) {
     $forums = $f->getAll();
     
     return $app['twig']->render('Main/Index.twig', array(
-        'forums' => $forums
+        'forums'      => $forums,
+        'forumTitle'  => '',
+        'forumID'     => '',
+        'threadID'    => 0,
+        'threadTitle' => '',
     ));
 });
 
@@ -36,12 +48,50 @@ $app->get('/f/{id}', function(Silex\Application $app, Request $req, $id = 0) {
     $threads = $t->getAll($id);
     
     return $app['twig']->render('Main/Threads.twig', array(
-        'forumTitle' => $forum['title'],
-        'forumID'    => $forum['id'],
-        'threads'    => $threads
+        'forumTitle'  => $forum['title'],
+        'forumID'     => $forum['id'],
+        'threadID'    => 0,
+        'threadTitle' => '',
+        'threads'     => $threads
     ));
 })->assert('id', "\d+");
 
+// New thread
+$app->post('/f/{forumID}/t/new', function(Silex\Application $app, Request $req, $forumID) {
+    
+    $thread            = $req->get('thread');
+    
+    $user              = $app['session']->get('user');
+    $post['createdBy'] = $user['id'];
+    
+    // Validate
+    $constraint = new Assert\Collection(array(
+        'title' => array(new Assert\NotBlank(), 
+                        new Assert\MinLength(10),
+                        new Assert\MaxLength(255)),
+        'forumID'  => new Assert\Regex("#\d+#"),
+        'createdBy' => new Assert\Regex("#\d+#"),
+    ));
+    
+    $errors = $app['validator']->validateValue($thread, $constraint);
+    
+    if (count($errors) > 0) {
+        $app['session']->set('errors', $errors);
+        return $app->redirect(sprintf('/f/%d/t/new', $forumID, $threadID));
+    } else {
+        $app['session']->set('errors', false);
+    }
+    
+    // Proceed
+    $p      = new Post($app['db']);
+    $postID = $p->add($post);
+    
+    return $app->redirect(sprintf('/f/%d/t/%d#post%d', $forumID, $threadID, $postID));
+    
+})->assert('forumID', "\d+")
+  ->assert('threadID', "\d+")
+  ->before($mustBeSignedIn);
+  
 // Post list
 $app->get('/f/{forumID}/t/{threadID}', function(Silex\Application $app, Request $req, $forumID = 0, $threadID = 0) {
     
@@ -70,6 +120,7 @@ $app->get('/f/{forumID}/t/{threadID}', function(Silex\Application $app, Request 
         'forumID'     => $forumID,
         'posts'       => $posts
     ));
+    
 })->assert('forumID',  "\d+")
   ->assert('threadID', "\d+");
 
@@ -81,13 +132,38 @@ $app->post('/f/{forumID}/t/{threadID}/reply', function(Silex\Application $app, R
     $user              = $app['session']->get('user');
     $post['createdBy'] = $user['id'];
     
+    //echo '<pre>';
+    //print_r($post);
+    //die;
+    
+    // Validate
+    $constraint = new Assert\Collection(array(
+        'body' => array(new Assert\NotBlank(), 
+                        new Assert\MinLength(10),
+                        new Assert\MaxLength(64000)),
+        'forumID'  => new Assert\Regex("#\d+#"),
+        'threadID' => new Assert\Regex("#\d+#"),
+        'createdBy' => new Assert\Regex("#\d+#"),
+    ));
+    
+    $errors = $app['validator']->validateValue($post, $constraint);
+    
+    if (count($errors) > 0) {
+        $app['session']->set('errors', $errors);
+        return $app->redirect(sprintf('/f/%d/t/%d#reply', $forumID, $threadID));
+    } else {
+        $app['session']->set('errors', false);
+    }
+    
+    // Proceed
     $p      = new Post($app['db']);
     $postID = $p->add($post);
     
     return $app->redirect(sprintf('/f/%d/t/%d#post%d', $forumID, $threadID, $postID));
     
 })->assert('forumID', "\d+")
-  ->assert('threadID', "\d+");
+  ->assert('threadID', "\d+")
+  ->before($mustBeSignedIn);
 
 // User profile
 $app->get('/u/{id}', function(Silex\Application $app, Request $req, $id = 0) {
@@ -104,8 +180,13 @@ $app->get('/u/{id}', function(Silex\Application $app, Request $req, $id = 0) {
     
     return $app['twig']->render('User/Profile.twig', array(
         'user'    => $user,
-        'threads' => $threads
+        'threads' => $threads,
+        'threadID' => 0,
+        'threadTitle' => '',
+        'forumID' => 0,
+        'forumTitle' => ''
     ));
+    
 })->assert('id', "\d+");
 
 // Sign in
@@ -117,7 +198,7 @@ $app->get('/u/sign-in', function(Silex\Application $app, Request $req) {
 });
 
 // Sign out
-$app->post('/u/sign-out', function(Silex\Application $app, Request $req) {
+$app->get('/u/sign-out', function(Silex\Application $app, Request $req) {
     
     if ($app['session']->has('user')) {
         $app['session']->remove('user');
@@ -161,3 +242,5 @@ $app->post('/u/sign-in', function(Silex\Application $app, Request $req) {
 });
 
 $app['twig']->addGlobal('signedIn', $app['session']->get('user'));
+$app['twig']->addGlobal('user', $app['session']->get('user'));
+$app['twig']->addGlobal('errors', $app['session']->get('errors'));

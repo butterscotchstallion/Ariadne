@@ -13,7 +13,7 @@ class Post extends Model
     {
         $query = 'SELECT p.id,
                          p.body,
-                         p.created_at AS createdAt,
+                         DATE_FORMAT(p.created_at, "%b %d %Y %h:%s %p") AS createdAt,
                          p.created_by AS createdBy,
                          p.forum_id AS forumID,
                          p.thread_id AS threadID,
@@ -27,8 +27,7 @@ class Post extends Model
                   JOIN threads t ON t.id = p.thread_id
                   WHERE 1=1
                   AND p.forum_id  = :forumID
-                  AND p.thread_id = :threadID
-                  ORDER BY p.created_at';
+                  AND p.thread_id = :threadID';
         
         return $this->fetchAll($query, array(':forumID'  => $forumID,
                                              ':threadID' => $threadID));

@@ -1,14 +1,20 @@
 
 <ul class="breadcrumb">
-    <li>
-        <a href="/f/{{ forumID }}">{{ forumTitle|e }}</a> <span class="divider">/</span>
-    </li>
+    {% if forumID %}
+        <li>
+            <a href="/">Forums</a> {% if forumID %}<span class="divider">/</span>{% endif %}
+        </li>
+    {% else %}
+        <li class="active">Forums</li>
+    {% endif %}
     
-    <!--
-    <li>
-        <a href="/f/{{ forumID }}/t/{{ threadID }}">{{ threadTitle|e }}</a> <span class="divider">/</span>
-    </li>
-    -->
+    {% if forumID %}
+        <li>
+            <a href="/f/{{ forumID }}">{{ forumTitle|e }}</a> {% if threadID %}<span class="divider">/</span>{% endif %}
+        </li>
+    {% endif %}
     
-    <li class="active">{{ threadTitle|e }}</li>
+    {% if threadTitle %}
+        <li class="active">{{ threadTitle|e }}</li>
+    {% endif %}
 </ul>

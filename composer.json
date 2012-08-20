@@ -5,7 +5,7 @@
         "swiftmailer/swiftmailer": ">=4.1",
         "doctrine/dbal": "2.2.*",
         "twig/twig": ">=1.8,<2.0-dev",
-        "fate/Silex-Extensions": "*"
+        "symfony/validator": "2.1.*"
     },
     
     "autoload": {

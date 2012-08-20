@@ -1,13 +1,30 @@
 
-<div class="well" id="replyBlock">
+<div class="well" id="reply">
+    {% if errors %}
+        <div class="alert alert-error">
+            <strong><i class="icon-exclamation-sign"></i> There was a problem with your post</strong>
+            
+            <ul>
+                {% for e in errors %}
+                    <li>{{ e.getPropertyPath() }} - {{ e.getMessage() }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    
     <form method="post" action="/f/{{ forumID }}/t/{{ threadID }}/reply" class="validateMe">
         <input type="hidden" name="reply[forumID]" value="{{ forumID }}">
         <input type="hidden" name="reply[threadID]" value="{{ threadID }}">
         
-        <textarea name="reply[body]" class="span8 required"></textarea>
+        <textarea name="reply[body]" 
+                  maxlength="64000"
+                  minlength="10"
+                  class="span8 required"></textarea>
         
         <div class="clearfix">
             <button type="submit" class="btn btn-success"><i class="icon-white icon-pencil"></i> Reply</button>
+            
+            <a href="/f/{{ forumID }}" class="btn btn-info"><i class="icon-white icon-th-list"></i> Back to thread list</a>
         </div>
     </form>
 </div>
