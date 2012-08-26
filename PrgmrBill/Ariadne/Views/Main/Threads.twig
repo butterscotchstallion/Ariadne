@@ -23,7 +23,7 @@
                     <td><a href="/f/{{ forumID }}/t/{{ t.id }}">{{ t.title|e }}</a></td>
                     <td>{{ t.postCount }}</td>  
                     <td><a href="/u/{{ t.createdBy }}">{{ t.createdByUser }}</a></td>
-                    <td>{{ t.createdAt }}</td>
+                    <td><abbr title="{{ t.createdAt }}">{{ t.createdAt }}</abbr></td>
                 </tr> 
             {% endfor %}  
         </tbody>
