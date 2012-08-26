@@ -2,7 +2,7 @@
 
 {% include 'Main/Breadcrumbs.twig' %}
 
-{% if signedIn %}
+{% if signedIn and canAddThreads %}
     <a href="/f/{{ forumID }}/t/new"
        class="btn">New Thread</a>
 {% endif %}

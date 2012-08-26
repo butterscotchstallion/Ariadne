@@ -1,6 +1,6 @@
 {% include 'Header.twig' %}
 
-{% if signedIn %}
+{% if signedIn and canAddForums %}
     <a href="/f/new"
        class="btn">New Forum</a>
 {% endif %}

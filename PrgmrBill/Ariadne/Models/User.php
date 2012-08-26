@@ -11,8 +11,9 @@ class User extends Model
 {
     function __construct($connection)
     {
-        $this->thread = new Thread($connection);
-        $this->post   = new Post($connection);
+        $this->thread     = new Thread($connection);
+        $this->post       = new Post($connection);
+        $this->permission = new Permission($connection);
         
         parent::__construct($connection);
     }
@@ -49,6 +50,10 @@ class User extends Model
         
         $user = $this->fetch($q, array(':name' => $name));
         
+        if ($user) {
+            $user['permissions'] = $this->permission->getPermissionsByUserID($user['id']);
+        }
+        
         return $user;
     }
     
@@ -65,7 +70,7 @@ class User extends Model
         $user = $this->fetch($q, array(':id' => (int) $id));
         
         if ($user) {
-            $user['threadCount'] = $this->thread->getCreatedThreadCount($id);
+            $user['threadCount'] = $this->thread->getCreatedThreadCount($id);            
         }
         
         return $user;

@@ -10,7 +10,8 @@ use Symfony\Component\HttpFoundation\Request,
     Ariadne\Models\Forum,
     Ariadne\Models\Thread,
     Ariadne\Models\Post,
-    Ariadne\Models\User;
+    Ariadne\Models\User,
+    Ariadne\Models\Permission;
     
     
 $mustBeSignedIn = function (Request $request) use ($app) {
@@ -22,6 +23,32 @@ $mustBeSignedIn = function (Request $request) use ($app) {
 $flash = function(Silex\Application $app, $msg) {
     $app['session']->setFlash('notice', $msg);
 };
+
+$hasPermission = function($permission, array $permissions) {
+    return in_array($permission, $permissions);
+};
+
+$canAddForums = function(array $permissions) use ($hasPermission) {
+    return $hasPermission(Permission::ADD_FORUM, $permissions);
+}; 
+
+$canAddThreads = function(array $permissions) use ($hasPermission) {
+    return $hasPermission(Permission::ADD_THREAD, $permissions);
+}; 
+
+$canAddPosts = function(array $permissions) use ($hasPermission) {
+    return $hasPermission(Permission::ADD_POST, $permissions);
+}; 
+
+$checkPermissions = function($permissionTest, $redirect) use($app, $flash) {
+    if (!$permissionTest) {
+        return $app->redirect($redirect);
+    }
+};
+
+$user = $app['session']->get('user') ? $app['session']->get('user') : array('permissions' => array());
+
+//print_r($user);
 
 // Forum list
 $app->get('/', function(Silex\Application $app, Request $req) {
@@ -48,7 +75,7 @@ $app->get('/f/new', function(Silex\Application $app, Request $req) {
 
 // New forum (POST)
 $app->post('/f/new', function(Silex\Application $app, Request $req) 
-                      use($flash) {
+                     use($flash) {
     
     $user               = $app['session']->get('user');
     $forum              = $req->get('forum');
@@ -83,7 +110,8 @@ $app->post('/f/new', function(Silex\Application $app, Request $req)
         return $app->redirect(sprintf('/f/%d', $forumID));
     }
     
-})->before($mustBeSignedIn);
+})->before($mustBeSignedIn)
+  ->before($checkPermissions($canAddForums($user['permissions']), '/f/new'));
   
 // Thread list
 $app->get('/f/{id}', function(Silex\Application $app, Request $req, $id = 0) {
@@ -271,12 +299,12 @@ $app->get('/u/{id}', function(Silex\Application $app, Request $req, $id = 0) {
     $threads = $t->getThreadTitlesByAuthor($id);
     
     return $app['twig']->render('User/Profile.twig', array(
-        'user'    => $user,
-        'threads' => $threads,
-        'threadID' => 0,
+        'user'        => $user,
+        'threads'     => $threads,
+        'threadID'    => 0,
         'threadTitle' => '',
-        'forumID' => 0,
-        'forumTitle' => ''
+        'forumID'     => 0,
+        'forumTitle'  => ''
     ));
     
 })->assert('id', "\d+");
@@ -330,7 +358,12 @@ $app->post('/u/sign-in', function(Silex\Application $app, Request $req) {
     return $app->redirect('/u/sign-in');
 });
 
+// Permissions
 $app['twig']->addGlobal('signedIn', $app['session']->get('user'));
+$app['twig']->addGlobal('canAddForums', $canAddForums($user['permissions']));
+$app['twig']->addGlobal('canAddThreads', $canAddThreads($user['permissions']));
+$app['twig']->addGlobal('canAddPosts', $canAddPosts($user['permissions']));
+
 $app['twig']->addGlobal('user', $app['session']->get('user'));
 $app['twig']->addGlobal('errors', $app['session']->get('errors'));
 $app['twig']->addGlobal('message', $app['session']->get('message'));

@@ -50,6 +50,8 @@ abstract class Model
         $stmt = $this->getStatement($query, $params);
         
         if ($stmt) {
+            $stmt->setFetchMode(\PDO::FETCH_ASSOC);
+            
             $result = $stmt->fetchAll();
             
             return $result;
