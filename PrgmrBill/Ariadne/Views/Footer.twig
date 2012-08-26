@@ -8,5 +8,35 @@
 <script src="/Assets/JS/jquery.timeago.js"></script>
 <script src="/Assets/JS/Ariadne.js"></script>
 
+{% if signedIn %}
+    <script src="/Assets/JS/jquery.NobleCount.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            $('#postReply').NobleCount('#newPostCharactersRemaining', {
+                on_negative: 'go_red',
+                on_positive: 'go_green',
+                max_chars: 64000,
+                min_chars: 10
+            });
+            
+            $('#newThreadPostBody').NobleCount('#newThreadCharactersRemaining', {
+                on_negative: 'go_red',
+                on_positive: 'go_green',
+                max_chars: 64000,
+                min_chars: 10
+            });
+            
+            $('#newThreadTitle').NobleCount('#newThreadTitleCharactersRemaining', {
+                on_negative: 'go_red',
+                on_positive: 'go_green',
+                max_chars: 255,
+                min_chars: 10
+            });      
+            
+        });    
+    </script>
+{% endif %}
+
 </body>
 </html>

@@ -10,7 +10,12 @@ class Sortable
 {
     private $columns = array();
     
-    function __construct(array $columns)
+    function __construct()
+    {
+        
+    }
+    
+    function setColumns(array $columns)
     {
         $this->columns = $columns;
     }

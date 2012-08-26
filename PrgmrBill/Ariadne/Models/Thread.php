@@ -43,7 +43,7 @@ class Thread extends Model
         
         // Invalid sort
         if (!in_array($sort, $sortable)) {
-            $sort = 'createdAt';
+            $sort = 'postCount';
         }
         
         if ($sort != 'postCount') {

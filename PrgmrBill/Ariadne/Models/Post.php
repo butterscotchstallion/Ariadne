@@ -48,7 +48,7 @@ class Post extends Model
         $user = $this->fetch($query, array(':forumID' => $forumID,
                                            ':threadID' => $threadID));
                                            
-        return $user ? $user : '';
+        return $user ? $user['name'] : '';
     }
     
     function getPostCounts()

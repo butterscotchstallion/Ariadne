@@ -30,7 +30,7 @@
                                     <td class="span8">
                                         <i class="icon-user"></i> 
                                         <a href="/u/{{ p.createdBy }}"
-                                           {% if p.createdByUser == originalPoster.name %}class="originalPoster"{% endif %}>{{ p.createdByUser|e }}</a>
+                                           {% if p.createdByUser == originalPoster %}class="originalPoster"{% endif %}>{{ p.createdByUser|e }}</a>
                                     </td>
                                 </tr>
                                 <tr><td colspan="2"><i class="icon-time"></i> <abbr title="{{ p.createdAt }}">{{ p.createdAt }}</abbr></td></tr>

@@ -5,6 +5,8 @@
  */
 namespace Ariadne\Models;
 
+use Ariadne\Application\Sortable;
+
 abstract class Model
 {
     private $connection;
@@ -12,11 +14,22 @@ abstract class Model
     function __construct($connection)
     {
         $this->connection = $connection;
+        $this->sortable   = new Sortable();
     }
     
     protected function getConnection()
     {
         return $this->connection;
+    }
+    
+    private function getSortable()
+    {
+        return $this->sortable;
+    }
+    
+    protected function getOrderBy($sort, $direction = 'DESC', $defaultColumn = null)
+    {
+        return $this->getSortable()->getOrderBy($sort, $direction, $defaultColumn);
     }
     
     protected function fetch($query, array $params = array())
