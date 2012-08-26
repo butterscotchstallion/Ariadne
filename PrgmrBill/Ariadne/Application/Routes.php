@@ -38,6 +38,53 @@ $app->get('/', function(Silex\Application $app, Request $req) {
     ));
 });
 
+// New forum (GET)
+$app->get('/f/new', function(Silex\Application $app, Request $req) {
+    
+    return $app['twig']->render('Main/NewForum.twig', array(
+        
+    ));
+});
+
+// New forum (POST)
+$app->post('/f/new', function(Silex\Application $app, Request $req) 
+                      use($flash) {
+    
+    $user               = $app['session']->get('user');
+    $forum              = $req->get('forum');
+    $forum['createdBy'] = $user['id'];
+    
+    // Validate
+    $constraint = new Assert\Collection(array(
+        'title' => array(new Assert\NotBlank(), 
+                        new Assert\MinLength(FORUM_TITLE_MIN_LENGTH),
+                        new Assert\MaxLength(FORUM_TITLE_MAX_LENGTH)),
+        'createdBy' => new Assert\Regex("#\d+#"),
+    ));
+    
+    $errors = $app['validator']->validateValue($forum, $constraint);
+    
+    if (count($errors) > 0) {
+        $app['session']->set('errors', $errors);
+        return $app->redirect(sprintf('/f/new?errors=1', $forumID));
+    } else {
+        $app['session']->set('errors', false);
+    }
+    
+    // Proceed!
+    $f       = new Forum($app['db']);
+    $forumID = $f->add($forum);
+    
+    // Problem creating forum
+    if (!$forumID) {
+        $app['session']->set('errors', array('Error creating forum'));
+        return $app->redirect('/f/new');
+    } else {        
+        return $app->redirect(sprintf('/f/%d', $forumID));
+    }
+    
+})->before($mustBeSignedIn);
+  
 // Thread list
 $app->get('/f/{id}', function(Silex\Application $app, Request $req, $id = 0) {
  

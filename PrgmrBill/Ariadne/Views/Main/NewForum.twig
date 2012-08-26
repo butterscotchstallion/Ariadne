@@ -1,0 +1,32 @@
+{% include 'Header.twig' %}
+
+<form method="POST" 
+      action="" 
+      class="form-vertical well validateMe"
+      id="newForumForm">
+    
+    <legend>New Forum</legend>
+    
+    {% include 'Errors.twig' %}
+    
+    <div class="control-row">
+        <label class="control-label">Title*</label>
+        
+        <div class="controls">
+            <input type="text"
+                   name="forum[title]"
+                   id="newforumTitle"
+                   class="span7 required"
+                   maxlength="255"
+                   minlength="10"
+                   placeholder="At least 10 characters, 255 maximum">
+        </div>
+    </div>
+    
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save New Forum</button>
+        <button type="button" class="btn" id="newforumCancel">Cancel</button>
+    </div>
+</form>
+
+{% include 'Footer.twig' %}

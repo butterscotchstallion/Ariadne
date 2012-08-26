@@ -1,8 +1,11 @@
 {% include 'Header.twig' %}
 
+{% if signedIn %}
+    <a href="/f/new"
+       class="btn">New Forum</a>
+{% endif %}
 
-
-<table class="table table-striped table-bordered table-condensed">
+<table class="table table-striped table-bordered table-condensed" style="margin-top: 1em;">
     <thead>
         <tr>
             <th>Title</th>

@@ -19,6 +19,19 @@ class Forum extends Model
         parent::__construct($connection);
     }
     
+    function add(array $forum)
+    {
+        $q = "INSERT INTO forums(title, 
+                                 created_at, 
+                                 created_by)
+              VALUES(:title,
+                     NOW(),
+                     :createdBy)";
+        
+        return $this->save($q, array(':title'     => $forum['title'],
+                                     ':createdBy' => $forum['createdBy']));
+    }
+    
     function getAll()
     {
         $query = 'SELECT f.id,
