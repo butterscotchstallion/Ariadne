@@ -211,7 +211,8 @@ $app->post('/f/{forumID}/t/new', function(Silex\Application $app, Request $req, 
     }
     
 })->assert('forumID', "\d+")
-  ->before($mustBeSignedIn);
+  ->before($mustBeSignedIn)
+  ->before($checkPermissions($canAddThreads($user['permissions']), '/'));
   
 // Post list
 $app->get('/f/{forumID}/t/{threadID}', function(Silex\Application $app, Request $req, $forumID = 0, $threadID = 0) {
@@ -248,7 +249,7 @@ $app->get('/f/{forumID}/t/{threadID}', function(Silex\Application $app, Request 
 })->assert('forumID',  "\d+")
   ->assert('threadID', "\d+");
 
-// New post
+// New post (POST)
 $app->post('/f/{forumID}/t/{threadID}/reply', function(Silex\Application $app, Request $req, $forumID, $threadID) {
     
     $post               = $req->get('reply');
@@ -283,7 +284,8 @@ $app->post('/f/{forumID}/t/{threadID}/reply', function(Silex\Application $app, R
     
 })->assert('forumID', "\d+")
   ->assert('threadID', "\d+")
-  ->before($mustBeSignedIn);
+  ->before($mustBeSignedIn)
+  ->before($checkPermissions($canAddPosts($user['permissions']), '/'));
 
 // User profile
 $app->get('/u/{id}', function(Silex\Application $app, Request $req, $id = 0) {
