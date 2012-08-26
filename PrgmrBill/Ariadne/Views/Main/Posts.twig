@@ -28,7 +28,9 @@
                                         <a href="/f/{{ forumID }}/t/{{ threadID }}#post{{ p.id }}">#{{ p.id }}</a>
                                     </td>
                                     <td class="span8">
-                                        <i class="icon-user"></i> <a href="/u/{{ p.createdBy }}">{{ p.createdByUser|e }}</a>
+                                        <i class="icon-user"></i> 
+                                        <a href="/u/{{ p.createdBy }}"
+                                           {% if p.createdByUser == originalPoster.name %}class="originalPoster"{% endif %}>{{ p.createdByUser|e }}</a>
                                     </td>
                                 </tr>
                                 <tr><td colspan="2"><i class="icon-time"></i> {{ p.createdAt }}</td></tr>

@@ -38,10 +38,15 @@ class Thread extends Model
     {
         $query = 'SELECT t.id,
                          t.title,
+                         t.created_at AS createdAt,
+                         u.name AS createdByUser,
+                         u.id AS createdBy,
                          t.forum_id AS forumID
                   FROM threads t
+                  JOIN users u ON u.id = t.created_by
                   WHERE 1=1
-                  AND t.forum_id = :forumID';
+                  AND t.forum_id = :forumID
+                  ORDER BY createdAt DESC';
         
         $result = $this->fetchAll($query, array(':forumID' => $forumID));
         

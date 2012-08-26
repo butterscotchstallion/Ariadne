@@ -33,6 +33,24 @@ class Post extends Model
                                              ':threadID' => $threadID));
     }
     
+    function getOriginalPostUser($forumID, $threadID)
+    {
+        $query = "SELECT u.name,    
+                         u.id
+                  FROM users u
+                  JOIN threads t ON t.created_by = u.id
+                  JOIN posts   p ON p.thread_id  = t.id
+                  WHERE 1=1
+                  AND p.is_first_post = 1
+                  AND t.forum_id      = :forumID
+                  AND t.id            = :threadID";
+        
+        $user = $this->fetch($query, array(':forumID' => $forumID,
+                                           ':threadID' => $threadID));
+                                           
+        return $user ? $user : '';
+    }
+    
     function getPostCounts()
     {
         $query = "SELECT COUNT(*) as postCount,
@@ -40,6 +58,7 @@ class Post extends Model
                   FROM posts p
                   JOIN threads t ON t.id = p.thread_id
                   WHERE 1=1
+                  AND p.is_first_post = 0
                   GROUP BY p.thread_id";
         
         $result = $this->fetchAll($query);
@@ -60,16 +79,21 @@ class Post extends Model
                                 thread_id, 
                                 created_at, 
                                 created_by,
-                                body)
+                                body,
+                                is_first_post)
               VALUES(:forumID,
                      :threadID,
                      NOW(),
                      :createdBy,
-                     :body)";
+                     :body,
+                     :isFirstPost)";
         
-        return $this->save($q, array(':forumID'   => $post['forumID'],
-                                     ':threadID'  => $post['threadID'],
-                                     ':createdBy' => $post['createdBy'],
-                                     ':body'      => $post['body']));
+        $isFirstPost = isset($post['isFirstPost']) ? $post['isFirstPost'] : 0;
+        
+        return $this->save($q, array(':forumID'     => $post['forumID'],
+                                     ':threadID'    => $post['threadID'],
+                                     ':createdBy'   => $post['createdBy'],
+                                     ':body'        => $post['body'],
+                                     ':isFirstPost' => $isFirstPost));
     }
 }

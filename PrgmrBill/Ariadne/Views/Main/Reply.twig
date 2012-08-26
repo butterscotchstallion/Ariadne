@@ -6,16 +6,20 @@
         <input type="hidden" name="reply[forumID]" value="{{ forumID }}">
         <input type="hidden" name="reply[threadID]" value="{{ threadID }}">
         
+        <label for="postReply"><i class="icon-comment"></i> Reply</label>
         <textarea name="reply[body]" 
                   maxlength="64000"
                   minlength="10"
                   tabindex="1"
+                  id="postReply"
                   class="span8 required"></textarea>
         
         <div class="clearfix">
             <button type="submit" class="btn btn-success"><i class="icon-white icon-pencil"></i> Reply</button>
             
-            <a href="/f/{{ forumID }}" class="btn btn-info"><i class="icon-white icon-th-list"></i> Back to thread list</a>
+            <a href="/f/{{ forumID }}" 
+               style="margin-left: 2em"
+               class="btn btn-info"><i class="icon-white icon-th-list"></i> Back to thread list</a>
         </div>
     </form>
 </div>

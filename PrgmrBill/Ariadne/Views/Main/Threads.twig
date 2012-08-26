@@ -13,6 +13,8 @@
             <tr>
                 <th>Title</th>
                 <th>Replies</th>
+                <th>Created By</th>
+                <th>Created At</th>
             </tr>
         </thead>
         <tbody>
@@ -20,6 +22,8 @@
                 <tr>
                     <td><a href="/f/{{ forumID }}/t/{{ t.id }}">{{ t.title|e }}</a></td>
                     <td>{{ t.postCount }}</td>  
+                    <td><a href="/u/{{ t.createdBy }}">{{ t.createdByUser }}</a></td>
+                    <td>{{ t.createdAt }}</td>
                 </tr> 
             {% endfor %}  
         </tbody>

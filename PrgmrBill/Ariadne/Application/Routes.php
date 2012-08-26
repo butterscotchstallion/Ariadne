@@ -167,10 +167,11 @@ $app->post('/f/{forumID}/t/new', function(Silex\Application $app, Request $req, 
     } else {
         // Thread created; create post and add it to that thread
         $p      = new Post($app['db']);
-        $postID = $p->add(array('forumID'   => $forumID,
-                                'threadID'  => $threadID,
-                                'createdBy' => $thread['createdBy'],
-                                'body'      => $thread['body']));
+        $postID = $p->add(array('forumID'     => $forumID,
+                                'threadID'    => $threadID,
+                                'createdBy'   => $thread['createdBy'],
+                                'body'        => $thread['body'],
+                                'isFirstPost' => 1));
         
         if (!$postID) {
             $app['session']->set('errors', array('Error creating thread'));
@@ -204,13 +205,16 @@ $app->get('/f/{forumID}/t/{threadID}', function(Silex\Application $app, Request 
     $p       = new Post($app['db']);
     $posts   = $p->getAll($forumID, $threadID);
     
+    $user    = $p->getOriginalPostUser($forumID, $threadID);
+    
     return $app['twig']->render('Main/Posts.twig', array(
-        'forumTitle'  => $forum['title'],
-        'threadTitle' => $thread['title'],
-        'postCount'   => count($posts),
-        'threadID'    => $threadID,
-        'forumID'     => $forumID,
-        'posts'       => $posts
+        'forumTitle'     => $forum['title'],
+        'threadTitle'    => $thread['title'],
+        'postCount'      => count($posts),
+        'threadID'       => $threadID,
+        'forumID'        => $forumID,
+        'posts'          => $posts,
+        'originalPoster' => $user
     ));
     
 })->assert('forumID',  "\d+")
