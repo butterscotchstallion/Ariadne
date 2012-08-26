@@ -13,6 +13,7 @@
     
     <script>
         $(document).ready(function() {
+            
             $('#postReply').NobleCount('#newPostCharactersRemaining', {
                 on_negative: 'go_red',
                 on_positive: 'go_green',
@@ -34,6 +35,12 @@
                 min_chars: 10
             });      
             
+            $('#newForumTitle').NobleCount('#newForumCharactersRemaining', {
+                on_negative: 'go_red',
+                on_positive: 'go_green',
+                max_chars: 255,
+                min_chars: 10
+            });  
         });    
     </script>
 {% endif %}

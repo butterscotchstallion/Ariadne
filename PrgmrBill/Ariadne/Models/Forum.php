@@ -46,7 +46,8 @@ class Forum extends Model
             $threadCounts = $this->thread->getThreadCounts();
             
             foreach ($forums as $key => $f) {
-                $forums[$key]['threadCount'] = $threadCounts[$f['id']];
+                $count = isset($threadCounts[$f['id']]) ? $threadCounts[$f['id']] : 0;
+                $forums[$key]['threadCount'] = $count;
             }
         }
         
