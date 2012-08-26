@@ -19,6 +19,10 @@ $mustBeSignedIn = function (Request $request) use ($app) {
     }
 };
 
+$flash = function(Silex\Application $app, $msg) {
+    $app['session']->setFlash('notice', $msg);
+};
+
 // Forum list
 $app->get('/', function(Silex\Application $app, Request $req) {
 
@@ -56,19 +60,40 @@ $app->get('/f/{id}', function(Silex\Application $app, Request $req, $id = 0) {
     ));
 })->assert('id', "\d+");
 
-// New thread
-$app->post('/f/{forumID}/t/new', function(Silex\Application $app, Request $req, $forumID) {
+// New Thread (GET)
+$app->get('/f/{forumID}/t/new', function(Silex\Application $app, 
+                                                    Request $req, 
+                                                    $forumID = 0) {
+    $f       = new Forum($app['db']);
+    $forum   = $f->getForumByID($forumID);
+     
+    if (!$forum) {
+        $app->abort(404, "Forum does not exist.");
+    }
     
-    $thread            = $req->get('thread');
+    return $app['twig']->render('Main/NewThread.twig', array(
+        'forumTitle'  => $forum['title'],
+        'forumID'     => $forum['id']
+    ));
     
-    $user              = $app['session']->get('user');
-    $post['createdBy'] = $user['id'];
+})->assert('forumID', "\d+");
+
+// New thread (POST)
+$app->post('/f/{forumID}/t/new', function(Silex\Application $app, Request $req, $forumID) 
+                                 use($flash) {
+    
+    $thread              = $req->get('thread');
+    $user                = $app['session']->get('user');
+    $thread['createdBy'] = $user['id'];
     
     // Validate
     $constraint = new Assert\Collection(array(
         'title' => array(new Assert\NotBlank(), 
-                        new Assert\MinLength(10),
-                        new Assert\MaxLength(255)),
+                        new Assert\MinLength(POST_MIN_LENGTH),
+                        new Assert\MaxLength(POST_TITLE_MAX_LENGTH)),
+        'body'     => array(new Assert\NotBlank(), 
+                        new Assert\MinLength(POST_MIN_LENGTH),
+                        new Assert\MaxLength(POST_MAX_LENGTH)),
         'forumID'  => new Assert\Regex("#\d+#"),
         'createdBy' => new Assert\Regex("#\d+#"),
     ));
@@ -77,19 +102,39 @@ $app->post('/f/{forumID}/t/new', function(Silex\Application $app, Request $req, 
     
     if (count($errors) > 0) {
         $app['session']->set('errors', $errors);
-        return $app->redirect(sprintf('/f/%d/t/new', $forumID, $threadID));
+        return $app->redirect(sprintf('/f/%d/t/new?errors=1', $forumID));
     } else {
         $app['session']->set('errors', false);
     }
     
-    // Proceed
-    $p      = new Post($app['db']);
-    $postID = $p->add($post);
+    // Proceed!
+    // 1. Add thread
+    // 2. Add post to resulting thread
+    $t        = new Thread($app['db']);
+    $threadID = $t->add($thread);
     
-    return $app->redirect(sprintf('/f/%d/t/%d#post%d', $forumID, $threadID, $postID));
+    // Problem creating thread
+    if (!$threadID) {
+        $app['session']->set('errors', array('Error creating thread'));
+        return $app->redirect(sprintf('/f/%d', $forumID));
+    } else {
+        // Thread created; create post and add it to that thread
+        $p      = new Post($app['db']);
+        $postID = $p->add(array('forumID'   => $forumID,
+                                'threadID'  => $threadID,
+                                'createdBy' => $thread['createdBy'],
+                                'body'      => $thread['body']));
+        
+        if (!$postID) {
+            $app['session']->set('errors', array('Error creating thread'));
+        } else {
+            $flash($app, 'Nice post!');
+        }   
+        
+        return $app->redirect(sprintf('/f/%d/t/%d', $forumID, $threadID));
+    }
     
 })->assert('forumID', "\d+")
-  ->assert('threadID', "\d+")
   ->before($mustBeSignedIn);
   
 // Post list
@@ -132,15 +177,11 @@ $app->post('/f/{forumID}/t/{threadID}/reply', function(Silex\Application $app, R
     $user              = $app['session']->get('user');
     $post['createdBy'] = $user['id'];
     
-    //echo '<pre>';
-    //print_r($post);
-    //die;
-    
     // Validate
     $constraint = new Assert\Collection(array(
         'body' => array(new Assert\NotBlank(), 
-                        new Assert\MinLength(10),
-                        new Assert\MaxLength(64000)),
+                        new Assert\MinLength(POST_MIN_LENGTH),
+                        new Assert\MaxLength(POST_MAX_LENGTH)),
         'forumID'  => new Assert\Regex("#\d+#"),
         'threadID' => new Assert\Regex("#\d+#"),
         'createdBy' => new Assert\Regex("#\d+#"),
@@ -223,15 +264,12 @@ $app->post('/u/sign-in', function(Silex\Application $app, Request $req) {
             require sprintf('%s/phpass/PasswordHash.php', VENDOR_ROOT);
             $hasher  = new \PasswordHash(8, false);
             
-            //var_dump($hasher->HashPassword($password));
-            //die;
-            
             $pwMatch = $hasher->CheckPassword($password, $user['password']);
             
-            //var_dump($pwMatch);
-            //die;
-            
             if ($pwMatch) {
+                // No reason to store this
+                unset($user['password']);
+                
                 $app['session']->set('user', $user);
                 return $app->redirect(sprintf('/u/%d', $user['id']));
             } 
@@ -244,3 +282,4 @@ $app->post('/u/sign-in', function(Silex\Application $app, Request $req) {
 $app['twig']->addGlobal('signedIn', $app['session']->get('user'));
 $app['twig']->addGlobal('user', $app['session']->get('user'));
 $app['twig']->addGlobal('errors', $app['session']->get('errors'));
+$app['twig']->addGlobal('message', $app['session']->get('message'));

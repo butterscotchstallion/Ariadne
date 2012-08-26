@@ -38,4 +38,8 @@ $app->register(new Silex\Provider\TwigServiceProvider(), array(
 $app->register(new Silex\Provider\SessionServiceProvider());
 $app->register(new Silex\Provider\ValidatorServiceProvider());
 
+define('POST_MIN_LENGTH', 10);
+define('POST_MAX_LENGTH', 64000);
+define('POST_TITLE_MAX_LENGTH', 255);
+
 require 'Routes.php';

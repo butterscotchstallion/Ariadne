@@ -1,0 +1,11 @@
+{% if errors %}
+    <div class="alert alert-error errorContainer">
+        <strong><i class="icon-exclamation-sign"></i> There was a problem with your post</strong>
+        
+        <ul>
+            {% for e in errors %}
+                <li>{{ e.getPropertyPath() }} - {{ e.getMessage() }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% endif %}

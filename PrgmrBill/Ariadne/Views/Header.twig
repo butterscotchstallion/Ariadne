@@ -42,7 +42,7 @@
                 {% else %}
                     <ul class="nav pull-right">
                         <li>
-                            <a href="/u/sign-in"><i class="icon-white icon-user"></i> Sign In</a>
+                            <a href="/u/sign-in"><i class="icon-user"></i> Sign In</a>
                         </li>
                     </ul>
                 {% endif %}
@@ -58,4 +58,9 @@
 </div>
 
 <div class="container" id="container">  
-    
+
+    {% if app.session.hasFlash('notice') %}
+        <div class="alert alert-success">
+            {{ app.session.flash('notice') }}
+        </div>
+    {% endif %}

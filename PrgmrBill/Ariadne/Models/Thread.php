@@ -18,6 +18,22 @@ class Thread extends Model
         parent::__construct($connection);
     }
     
+    function add(array $thread)
+    {
+        $q = "INSERT INTO threads(forum_id, 
+                                  title, 
+                                  created_at, 
+                                  created_by)
+              VALUES(:forumID,
+                     :title,
+                     NOW(),
+                     :createdBy)";
+        
+        return $this->save($q, array(':forumID'   => $thread['forumID'],
+                                     ':title'     => $thread['title'],
+                                     ':createdBy' => $thread['createdBy']));
+    }
+    
     function getAll($forumID)
     {
         $query = 'SELECT t.id,

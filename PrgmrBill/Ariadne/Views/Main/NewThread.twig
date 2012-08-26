@@ -1,0 +1,45 @@
+{% include 'Header.twig' %}
+
+<form method="POST" 
+      action="/f/{{ forumID }}/t/new" 
+      class="form-vertical well validateMe"
+      id="newThreadForm">
+    <input type="hidden" name="thread[forumID]" value="{{ forumID }}">
+    
+    <legend>New Thread</legend>
+    
+    {% include 'Errors.twig' %}
+    
+    <div class="control-row">
+        <label class="control-label">Title*</label>
+        
+        <div class="controls">
+            <input type="text"
+                   name="thread[title]"
+                   id="newThreadTitle"
+                   class="span7 required"
+                   maxlength="255"
+                   placeholder="At least 10 characters, 255 maximum">
+        </div>
+    </div>
+    
+    <div class="control-row">
+        <label class="control-label">Post*</label>
+        
+        <div class="controls">
+            <textarea name="thread[body]" 
+                      class="span7 required"
+                      cols="20"
+                      rows="5"
+                      id="newThreadPostBody"
+                      placeholder="At least 10 characters"></textarea>
+        </div>
+    </div>
+    
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save New Thread</button>
+        <button type="button" class="btn" id="newThreadCancel">Cancel</button>
+    </div>
+</form>
+
+{% include 'Footer.twig' %}
