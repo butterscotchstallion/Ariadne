@@ -96,7 +96,7 @@ $app->get('/f/{id}', function(Silex\Application $app, Request $req, $id = 0) {
     }
     
     $t       = new Thread($app['db']);
-    $threads = $t->getAll($id);
+    $threads = $t->getAll($id, $req->get('sort'));
     
     return $app['twig']->render('Main/Threads.twig', array(
         'forumTitle'  => $forum['title'],

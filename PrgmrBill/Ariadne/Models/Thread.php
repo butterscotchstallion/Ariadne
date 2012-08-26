@@ -34,30 +34,54 @@ class Thread extends Model
                                      ':createdBy' => $thread['createdBy']));
     }
     
-    function getAll($forumID)
+    function getAll($forumID, $sort = null)
     {
-        $query = 'SELECT t.id,
-                         t.title,
-                         t.created_at AS createdAt,
-                         u.name AS createdByUser,
-                         u.id AS createdBy,
-                         t.forum_id AS forumID
-                  FROM threads t
-                  JOIN users u ON u.id = t.created_by
-                  WHERE 1=1
-                  AND t.forum_id = :forumID
-                  ORDER BY createdAt DESC';
+        $sortable = array('createdAt',
+                          'createdByUser',
+                          'title',
+                          'postCount');
+        
+        // Invalid sort
+        if (!in_array($sort, $sortable)) {
+            $sort = 'createdAt';
+        }
+        
+        if ($sort != 'postCount') {
+            $order = sprintf("ORDER BY %s DESC", $sort);
+        } else {
+            $order = '';
+        }
+        
+        $query = sprintf('SELECT t.id,
+                                 t.title,
+                                 t.created_at AS createdAt,
+                                 u.name AS createdByUser,
+                                 u.id AS createdBy,
+                                 t.forum_id AS forumID
+                          FROM threads t
+                          JOIN users u ON u.id = t.created_by
+                          WHERE 1=1
+                          AND t.forum_id = :forumID
+                          %s', $order);
         
         $result = $this->fetchAll($query, array(':forumID' => $forumID));
         
         if ($result) {
             // Lookup array of all post counts
-            $postCounts = $this->post->getPostCounts();
+            $postCounts    = $this->post->getPostCounts();
+            $postCountSort = array();
             
             foreach ($result as $key => $t) {
                 // If this value is set, there is at least one post
                 // If not, there are no posts in that thread
-                $result[$key]['postCount'] = isset($postCounts[$t['id']]) ? $postCounts[$t['id']] : 0;
+                $postCount = isset($postCounts[$t['id']]) ? $postCounts[$t['id']] : 0;
+                $result[$key]['postCount'] = $postCount;
+                
+                $postCountSort[$key] = $postCount;
+            }
+            
+            if ($sort == 'postCount') {
+                array_multisort($postCountSort, SORT_DESC, $result, SORT_NUMERIC);
             }
         }
         
