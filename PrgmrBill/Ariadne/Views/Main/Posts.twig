@@ -34,10 +34,17 @@
                                     </td>
                                 </tr>
                                 <tr><td colspan="2"><i class="icon-time"></i> <abbr title="{{ p.createdAt }}">{{ p.createdAt }}</abbr></td></tr>
+                                <tr>
+                                    <td colspan="2">
+                                        {% include 'Main/PostTags.twig' %}
+                                    </td>                                    
+                                </tr>
                             </tbody>
                         </table>
                     </td>  
-                    <td class="postBodyBlock">{{ p.body|e }}</td>
+                    <td class="postBodyBlock">
+                        {{ p.body|e }}
+                    </td>
                 </tr> 
             {% endfor %}
         </tbody>

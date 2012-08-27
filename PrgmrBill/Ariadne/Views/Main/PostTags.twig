@@ -1,0 +1,14 @@
+
+{% if p.tags %}
+    <span class="postTagsContainer" title="Tags for this post">
+        <ul>
+            {% for t in p.tags %}
+                <li>
+                    <a href="/t/{{ t.id }}">
+                        <span class="label">{{ t.name|e }}</span>
+                    </a>
+                </li>
+            {% endfor %}            
+        </ul>
+    </span>
+{% endif %}

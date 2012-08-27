@@ -9,6 +9,15 @@ use Ariadne\Models\Model;
 
 class Post extends Model
 {
+    private $tag;
+    
+    function __construct($connection)
+    {
+        $this->tag = new Tag($connection);
+        
+        parent::__construct($connection);
+    }
+    
     function getAll($forumID, $threadID)
     {
         $query = 'SELECT p.id,
@@ -29,8 +38,18 @@ class Post extends Model
                   AND p.forum_id  = :forumID
                   AND p.thread_id = :threadID';
         
-        return $this->fetchAll($query, array(':forumID'  => $forumID,
-                                             ':threadID' => $threadID));
+        $posts = $this->fetchAll($query, array(':forumID'  => $forumID,
+                                               ':threadID' => $threadID));
+                                               
+        if ($posts) {
+            $tags = $this->tag->getPostTags($threadID);
+            
+            foreach ($posts as $key => $p) {
+                $posts[$key]['tags'] = isset($tags[$p['id']]) ? $tags[$p['id']] : array();
+            }
+        }
+        
+        return $posts;
     }
     
     function getOriginalPostUser($forumID, $threadID)
