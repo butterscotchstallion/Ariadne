@@ -36,4 +36,26 @@ class Tag extends Model
         
         return $tags;
     }
+    
+    function getPostsByTagID($tagID)
+    {
+        $query = "SELECT f.id AS forumID,
+                         f.title AS forumTitle,
+                         th.id AS threadID,
+                         th.title AS threadTitle,
+                         p.id AS postID,
+                         t.name AS tagName
+                  FROM tags t
+                  JOIN post_tags pt ON pt.tag_id = t.id
+                  JOIN posts p ON p.id = pt.post_id
+                  JOIN forums f ON f.id = p.forum_id
+                  JOIN threads th ON th.id = p.thread_id
+                  WHERE 1=1
+                  AND t.id = :tagID
+                  GROUP BY t.id";
+        
+        $result = $this->fetchAll($query, array(':tagID' => $tagID));
+        
+        return $result;
+    }
 }

@@ -1,0 +1,21 @@
+{% include 'Header.twig' %}
+
+{% if posts %}
+    <p>There are <strong>{{ postCount }}</strong> post(s) with this tag</p>
+    
+    <table class="table table-striped table-bordered table-condensed">
+        {% for p in posts %}
+            <tr>
+                <td>
+                    <a href="/f/{{ p.forumID }}/t/{{ p.threadID }}#post{{ p.postID }}">
+                        {{ p.forumTitle|e }} &raquo; {{ p.threadTitle|e }}
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+{% else %}
+    No posts with this tag
+{% endif %}
+
+{% include 'Footer.twig' %}

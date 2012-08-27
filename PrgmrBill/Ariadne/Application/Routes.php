@@ -11,7 +11,8 @@ use Symfony\Component\HttpFoundation\Request,
     Ariadne\Models\Thread,
     Ariadne\Models\Post,
     Ariadne\Models\User,
-    Ariadne\Models\Permission;
+    Ariadne\Models\Permission,
+    Ariadne\Models\Tag;
     
     
 $mustBeSignedIn = function (Request $request) use ($app) {
@@ -359,6 +360,21 @@ $app->post('/u/sign-in', function(Silex\Application $app, Request $req) {
     
     return $app->redirect('/u/sign-in');
 });
+
+// Posts with this tag
+$app->get('/t/{tagID}', function(Silex\Application $app, 
+                                                   Request $req, 
+                                                   $tagID = 0) {
+    
+    $t     = new Tag($app['db']);
+    $posts = $t->getPostsByTagID($tagID); 
+    
+    return $app['twig']->render('Main/TagList.twig', array(
+        'posts'     => $posts,
+        'postCount' => count($posts)
+    ));
+    
+})->assert('tagID', "\d+");
 
 // Permissions
 $app['twig']->addGlobal('signedIn', $app['session']->get('user'));
