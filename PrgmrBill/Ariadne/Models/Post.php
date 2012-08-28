@@ -22,6 +22,7 @@ class Post extends Model
     {
         $query = 'SELECT p.id,
                          p.body,
+                         p.bump,
                          DATE_FORMAT(p.created_at, "%b %d %Y %h:%s %p") AS createdAt,
                          p.created_by AS createdBy,
                          p.forum_id AS forumID,
@@ -52,10 +53,38 @@ class Post extends Model
         return $posts;
     }
     
+    function getLatestPostsFromThreads($forumID)
+    {
+        $query = "SELECT u.id,
+                         u.name,
+                         p.id
+                  FROM posts p
+                  JOIN users u ON u.id = p.created_by
+                  WHERE 1=1
+                  AND p.forum_id = :forumID
+                  ORDER BY created_at DESC
+                  LIMIT 1";
+        
+        $result = $this->fetch($query, array(':forumID' => $forumID));
+        $posts  = array();
+        
+        if ($result) {
+            /**
+             * Create lookup array using 
+             * threadID as the key
+             *
+             */
+            foreach ($result as $key => $p) {
+                $posts[$p['threadID']] = $p;
+            }
+        }
+        
+        return $posts;
+    }
+    
     function getOriginalPostUser($forumID, $threadID)
     {
-        $query = "SELECT u.name,    
-                         u.id
+        $query = "SELECT u.name
                   FROM users u
                   JOIN threads t ON t.created_by = u.id
                   JOIN posts   p ON p.thread_id  = t.id
@@ -64,20 +93,27 @@ class Post extends Model
                   AND t.forum_id      = :forumID
                   AND t.id            = :threadID";
         
-        $user = $this->fetch($query, array(':forumID' => $forumID,
+        $user = $this->fetch($query, array(':forumID'  => $forumID,
                                            ':threadID' => $threadID));
                                            
         return $user ? $user['name'] : '';
     }
     
+    /**
+     * Gets the number of posts in a thread. We don't count
+     * the original post or posts which have the "bump" checkbox
+     * unchecked.
+     *
+     */
     function getPostCounts()
     {
-        $query = "SELECT COUNT(*) as postCount,
+        $query = "SELECT COUNT(*)    AS postCount,
                          p.thread_id AS threadID
                   FROM posts p
                   JOIN threads t ON t.id = p.thread_id
                   WHERE 1=1
                   AND p.is_first_post = 0
+                  AND p.bump          = 1
                   GROUP BY p.thread_id";
         
         $result = $this->fetchAll($query);
@@ -99,20 +135,24 @@ class Post extends Model
                                 created_at, 
                                 created_by,
                                 body,
-                                is_first_post)
+                                is_first_post,
+                                bump)
               VALUES(:forumID,
                      :threadID,
                      NOW(),
                      :createdBy,
                      :body,
-                     :isFirstPost)";
+                     :isFirstPost,
+                     :bump)";
         
         $isFirstPost = isset($post['isFirstPost']) ? $post['isFirstPost'] : 0;
+        $bump        = isset($post['bump']) ? (int) $post['bump'] : 0;
         
         return $this->save($q, array(':forumID'     => $post['forumID'],
                                      ':threadID'    => $post['threadID'],
                                      ':createdBy'   => $post['createdBy'],
                                      ':body'        => $post['body'],
-                                     ':isFirstPost' => $isFirstPost));
+                                     ':isFirstPost' => $isFirstPost,
+                                     ':bump'        => $bump));
     }
 }

@@ -15,9 +15,14 @@
                   class="span8 required"></textarea>
         <p>
             <span id="newPostCharactersRemaining"></span> characters remaining
+            
+            <label class="checkbox inline" style="margin-left: 1em">
+                <input type="checkbox" name="reply[bump]" value="1" checked>
+                Bump
+            </label>
         </p>
         
-        <div class="clearfix">
+        <div style="clear:both">
             <button type="submit" class="btn btn-success"><i class="icon-white icon-pencil"></i> Reply</button>
             
             <a href="/f/{{ forumID }}" 

@@ -42,7 +42,7 @@
                             </tbody>
                         </table>
                     </td>  
-                    <td class="postBodyBlock">
+                    <td class="postBodyBlock{% if not p.bump %} sagedPost{% endif %}">
                         {{ p.body|e }}
                     </td>
                 </tr> 
