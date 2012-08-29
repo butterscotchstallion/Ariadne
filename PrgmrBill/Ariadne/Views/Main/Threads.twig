@@ -13,8 +13,11 @@
             <tr>
                 <th class="span10"><a href="/f/{{ forumID }}?sort=title">Title</a></th>
                 <th class="span1"><a href="/f/{{ forumID }}?sort=postCount">Replies</a></th>
+                <th class="span2">Last Post</th>
                 <th class="span2"><a href="/f/{{ forumID }}?sort=createdByUser">Created By</a></th>
+                <!--
                 <th><a href="/f/{{ forumID }}?sort=createdAt">Created At</a></th>
+                -->
             </tr>
         </thead>
         <tbody>
@@ -22,8 +25,11 @@
                 <tr>
                     <td class="span10"><a href="/f/{{ forumID }}/t/{{ t.id }}">{{ t.title|e }}</a></td>
                     <td class="span1"><i class="icon-comment"></i> {{ t.postCount }}</td>  
+                    <td class="span2"><a href="/u/{{ t.lastPost.userID }}"><i class="icon-user"></i> {{ t.lastPost.name }}</a></td>
                     <td class="span2"><a href="/u/{{ t.createdBy }}"><i class="icon-user"></i> {{ t.createdByUser }}</a></td>
+                    <!--
                     <td><i class="icon-time"></i> <abbr title="{{ t.createdAt }}">{{ t.createdAt }}</abbr></td>
+                    -->
                 </tr> 
             {% endfor %}  
         </tbody>

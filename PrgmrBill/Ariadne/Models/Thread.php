@@ -71,11 +71,17 @@ class Thread extends Model
             $postCounts    = $this->post->getPostCounts();
             $postCountSort = array();
             
+            // Latest posts
+            $latestPosts = $this->post->getLatestPostsFromThreads($forumID);
+            
             foreach ($result as $key => $t) {
                 // If this value is set, there is at least one post
                 // If not, there are no posts in that thread
                 $postCount = isset($postCounts[$t['id']]) ? $postCounts[$t['id']] : 0;
                 $result[$key]['postCount'] = $postCount;
+                
+                // Last post
+                $result[$key]['lastPost'] = isset($latestPosts[$t['id']]) ? $latestPosts[$t['id']] : array();
                 
                 $postCountSort[$key] = $postCount;
             }

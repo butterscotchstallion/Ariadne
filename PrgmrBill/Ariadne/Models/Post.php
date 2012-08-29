@@ -46,7 +46,7 @@ class Post extends Model
             $tags = $this->tag->getPostTags($threadID);
             
             foreach ($posts as $key => $p) {
-                $posts[$key]['tags'] = isset($tags[$p['id']]) ? $tags[$p['id']] : array();
+                $posts[$key]['tags']     = isset($tags[$p['id']]) ? $tags[$p['id']] : array();                
             }
         }
         
@@ -55,17 +55,18 @@ class Post extends Model
     
     function getLatestPostsFromThreads($forumID)
     {
-        $query = "SELECT u.id,
+        $query = "SELECT p.created_by AS userID,
                          u.name,
-                         p.id
+                         p.id,
+                         t.id AS threadID
                   FROM posts p
                   JOIN users u ON u.id = p.created_by
+                  JOIN threads t ON t.id = p.thread_id
                   WHERE 1=1
                   AND p.forum_id = :forumID
-                  ORDER BY created_at DESC
-                  LIMIT 1";
+                  ORDER BY p.created_at DESC";
         
-        $result = $this->fetch($query, array(':forumID' => $forumID));
+        $result = $this->fetchAll($query, array(':forumID' => $forumID));
         $posts  = array();
         
         if ($result) {
