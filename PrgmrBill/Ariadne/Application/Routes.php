@@ -265,6 +265,7 @@ $app->post('/f/{forumID}/t/{threadID}/reply', function(Silex\Application $app, R
                         new Assert\MaxLength(POST_MAX_LENGTH)),
         'forumID'  => new Assert\Regex("#\d+#"),
         'threadID' => new Assert\Regex("#\d+#"),
+        'bump'     => new Assert\Regex("#[0,1]#"),
         'createdBy' => new Assert\Regex("#\d+#"),
     ));
     
@@ -276,6 +277,14 @@ $app->post('/f/{forumID}/t/{threadID}/reply', function(Silex\Application $app, R
     } else {
         $app['session']->set('errors', false);
     }
+    
+    // Quoting another post
+    $replaceLink  = sprintf("<a href='/f/%d/t/%d/#post%d'>\\0</a>", $forumID, $threadID, $postID);
+    $post['body'] = preg_replace("#^>>(\d+)#", $replaceLink, $post['body']);
+    
+    //echo '<pre>';
+    //print_r($post);
+    //die;
     
     // Proceed
     $p      = new Post($app['db']);
