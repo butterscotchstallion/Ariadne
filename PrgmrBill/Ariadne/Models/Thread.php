@@ -14,6 +14,7 @@ class Thread extends Model
     function __construct($connection)
     {
         $this->post = new Post($connection);
+        $this->vote = new PostVote($connection);
         
         parent::__construct($connection);
     }
@@ -72,7 +73,8 @@ class Thread extends Model
             $postCountSort = array();
             
             // Latest posts
-            $latestPosts = $this->post->getLatestPostsFromThreads($forumID);
+            $latestPosts   = $this->post->getLatestPostsFromThreads($forumID);
+            $threadRatings = $this->vote->getThreadRatings();
             
             foreach ($result as $key => $t) {
                 // If this value is set, there is at least one post
@@ -83,7 +85,10 @@ class Thread extends Model
                 // Last post
                 $result[$key]['lastPost'] = isset($latestPosts[$t['id']]) ? $latestPosts[$t['id']] : array();
                 
-                $postCountSort[$key] = $postCount;
+                // Thread rating (sum of all votes on posts in this thread)
+                $result[$key]['rating']   = isset($threadRatings[$t['id']]) ? $threadRatings[$t['id']] : 0;
+                 
+                $postCountSort[$key]      = $postCount;
             }
             
             if ($sort == 'postCount') {

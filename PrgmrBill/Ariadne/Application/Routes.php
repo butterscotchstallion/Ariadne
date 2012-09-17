@@ -273,7 +273,7 @@ use($checkPermissions, $canVote, $user)                                         
         'userID'    => new Assert\Regex("#\d+#"),
         'postID'    => new Assert\Regex("#\d+#"),
         'threadID'  => new Assert\Regex("#\d+#"),
-        'up'        => new Assert\Regex("#[0,1]#")
+        'up'        => new Assert\Regex("#[-1,1]#")
     ));
     
     $errors = $app['validator']->validateValue($vote, $constraint);

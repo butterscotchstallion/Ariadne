@@ -10,7 +10,7 @@ use Ariadne\Models\Model;
 class PostVote extends Model
 {   
     const VOTE_UP   = 1;
-    const VOTE_DOWN = 0;
+    const VOTE_DOWN = -1;
     
     function vote(array $vote)
     {
@@ -34,25 +34,34 @@ class PostVote extends Model
         return $result;
     }
     
-    function getVotes($threadID, $postID = null)
+    function getVotes($threadID = null, $postID = null)
     {
-        $postFilter = '';
         $params     = array(':threadID' => $threadID);
         
+        $postFilter = '';
         if ($postID) {
-            $postFilter = "AND pv.post_id = :postID";
+            $postFilter        = "AND pv.post_id = :postID";
             $params[':postID'] = $postID;
+        }
+        
+        $threadFilter = '';
+        if ($threadID) {
+            $threadFilter        = "AND pv.thread_id = :threadID";
+            $params[':threadID'] = $threadID;
         }
         
         $query = sprintf("SELECT SUM(pv.up) AS rating,
                                  pv.post_id AS postID,
-                                 pv.created_at AS createdAt
+                                 pv.created_at AS createdAt,
+                                 pv.thread_id AS threadID
                           FROM post_votes pv
                           JOIN posts p ON p.id = pv.post_id
                           WHERE 1=1
-                          AND pv.thread_id = :threadID
                           %s
-                          GROUP BY postID", $postFilter);
+                          %s
+                          GROUP BY postID", 
+                          $threadFilter,
+                          $postFilter);
         
         $result = $this->fetchAll($query, $params);
         $votes  = array();
@@ -64,5 +73,23 @@ class PostVote extends Model
         }
         
         return $votes;
+    }
+    
+    function getThreadRatings()
+    {
+        $votes   = $this->getVotes();
+        $ratings = array();
+        
+        if ($votes) {
+            foreach ($votes as $key => $v) {
+                if (!isset($ratings[$v['threadID']])) {
+                    $ratings[$v['threadID']] = 0;
+                }
+                
+                $ratings[$v['threadID']] += $v['rating'];
+            }
+        }
+        
+        return $ratings;
     }
 }
