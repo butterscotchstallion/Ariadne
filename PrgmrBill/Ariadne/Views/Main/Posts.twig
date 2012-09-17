@@ -23,6 +23,28 @@
                         <a href="/u/{{ p.createdBy }}"><img src="/Assets/Images/User/{{ p.createdByUserImage }}"></a>
                         <table class="table table-condensed">
                             <tbody>
+                                <tr><td colspan="2">
+                                    Rating: <span data-post-rating="{{ p.id }}">{{ p.rating }}</span>
+                                </td></tr>
+                                
+                                {% if signedIn %}
+                                    <tr><td colspan="2">
+                                        <button data-post-id="{{ p.id }}"
+                                                data-vote-up="1"
+                                                data-thread-id="{{ threadID }}"
+                                                data-forum-id="{{ forumID }}"
+                                                title="This post is awesome"
+                                                class="btn btn-success voteButton"><i class="icon-white icon-thumbs-up"></i></button>
+                                               
+                                        <button data-post-id="{{ p.id }}"
+                                                data-vote-up="0"
+                                                data-thread-id="{{ threadID }}"
+                                                data-forum-id="{{ forumID }}"
+                                                title="This post sucks"
+                                                class="btn btn-danger pull-right voteButton"><i class="icon-white icon-thumbs-down"></i></button>
+                                    </td></tr>
+                                {% endif %}
+                                
                                 <tr>
                                     <td class="span1">
                                         <a href="/f/{{ forumID }}/t/{{ threadID }}#post{{ p.id }}">#{{ p.id }}</a>

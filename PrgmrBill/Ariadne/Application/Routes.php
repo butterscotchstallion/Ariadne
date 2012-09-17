@@ -12,8 +12,8 @@ use Symfony\Component\HttpFoundation\Request,
     Ariadne\Models\Post,
     Ariadne\Models\User,
     Ariadne\Models\Permission,
-    Ariadne\Models\Tag;
-    
+    Ariadne\Models\Tag,
+    Ariadne\Models\PostVote;
     
 $mustBeSignedIn = function (Request $request) use ($app) {
     if (!$app['session']->has('user')) {
@@ -41,7 +41,11 @@ $canAddPosts = function(array $permissions) use ($hasPermission) {
     return $hasPermission(Permission::ADD_POST, $permissions);
 }; 
 
-$checkPermissions = function($permissionTest, $redirect) use($app, $flash) {
+$canVote = function(array $permissions) use ($hasPermission) {
+    return $hasPermission(Permission::VOTE_POST, $permissions);
+};
+
+$checkPermissions = function($permissionTest, $redirect = '/') use($app, $flash) {
     if (!$permissionTest) {
         return $app->redirect($redirect);
     }
@@ -249,6 +253,59 @@ $app->get('/f/{forumID}/t/{threadID}', function(Silex\Application $app, Request 
     
 })->assert('forumID',  "\d+")
   ->assert('threadID', "\d+");
+
+// Vote on post
+$app->post('/f/{forumID}/t/{threadID}/p/{postID}/vote', function(Silex\Application $app, 
+                                                                 Request $req, 
+                                                                 $forumID  = 0, 
+                                                                 $threadID = 0,
+                                                                 $postID   = 0)
+use($checkPermissions, $canVote, $user)                                                                 {
+    
+    // Assemble vote information
+    $vote           = $req->get('vote');
+    $user           = $app['session']->get('user');
+    $vote['userID'] = $user['id'];
+    
+    // Validate
+    $constraint = new Assert\Collection(array(
+        'forumID'   => new Assert\Regex("#\d+#"),
+        'userID'    => new Assert\Regex("#\d+#"),
+        'postID'    => new Assert\Regex("#\d+#"),
+        'threadID'  => new Assert\Regex("#\d+#"),
+        'up'        => new Assert\Regex("#[0,1]#")
+    ));
+    
+    $errors = $app['validator']->validateValue($vote, $constraint);
+    
+    if (count($errors) > 0) {
+        $app['session']->set('errors', $errors);
+        return $app->redirect(sprintf('/f/%d/t/%d', $forumID, $threadID));
+    } else {
+        $app['session']->set('errors', false);
+    }
+    
+    // Vote on post
+    $voter  = new PostVote($app['db']);
+    $result = $voter->vote($vote);
+    $status = $result ? "OK" : "ERROR";
+    
+    // Get new rating of post
+    $ratingResult = $voter->getVotes($threadID, $vote['postID']);
+    $rating       = isset($ratingResult[$vote['postID']]['rating']) ? $ratingResult[$vote['postID']]['rating'] : 0;
+    
+    //print_r($ratingResult);
+    //die;
+    
+    return $app->json(array('Status' => $status,
+                            'Rating' => $rating));
+    
+})->assert('forumID',  "\d+")
+  ->assert('threadID', "\d+")
+  ->assert('postID',   "\d+")
+  ->before($mustBeSignedIn);
+  
+  //->before($checkPermissions($canVote($user['permissions']), '/'));
 
 // New post (POST)
 $app->post('/f/{forumID}/t/{threadID}/reply', function(Silex\Application $app, Request $req, $forumID, $threadID) {

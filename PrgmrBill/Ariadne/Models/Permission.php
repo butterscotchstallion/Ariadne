@@ -12,6 +12,7 @@ class Permission extends Model
     const ADD_FORUM  = 'Add Post';
     const ADD_THREAD = 'Add Forum';
     const ADD_POST   = 'Add Post';
+    const VOTE_POST  = 'Vote Post';
     
     function getPermissionsByUserID($userID)
     {

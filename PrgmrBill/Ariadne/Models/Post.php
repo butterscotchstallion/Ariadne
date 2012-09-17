@@ -10,10 +10,12 @@ use Ariadne\Models\Model;
 class Post extends Model
 {
     private $tag;
+    private $vote;
     
     function __construct($connection)
     {
-        $this->tag = new Tag($connection);
+        $this->tag  = new Tag($connection);
+        $this->vote = new PostVote($connection);
         
         parent::__construct($connection);
     }
@@ -43,10 +45,14 @@ class Post extends Model
                                                ':threadID' => $threadID));
                                                
         if ($posts) {
-            $tags = $this->tag->getPostTags($threadID);
+            $tags  = $this->tag->getPostTags($threadID);
+            $votes = $this->vote->getVotes($threadID);
+            
+            //print_r($votes);
             
             foreach ($posts as $key => $p) {
-                $posts[$key]['tags']     = isset($tags[$p['id']]) ? $tags[$p['id']] : array();                
+                $posts[$key]['tags']   = isset($tags[$p['id']]) ? $tags[$p['id']] : array(); 
+                $posts[$key]['rating'] = isset($votes[$p['id']]['rating']) ? $votes[$p['id']]['rating'] : 0; 
             }
         }
         
