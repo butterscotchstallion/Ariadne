@@ -34,7 +34,7 @@
                                                 data-thread-id="{{ threadID }}"
                                                 data-forum-id="{{ forumID }}"
                                                 title="This post is awesome"
-                                                {% if p.hasVoted %}
+                                                {% if p.hasVoted or p.createdBy == user.id %}
                                                 disabled
                                                 {% endif %}
                                                 class="btn btn-success voteButton {% if p.hasVoted %}disabled{% endif %}"><i class="icon-white icon-thumbs-up"></i></button>
@@ -44,7 +44,7 @@
                                                 data-thread-id="{{ threadID }}"
                                                 data-forum-id="{{ forumID }}"
                                                 title="This post sucks"
-                                                {% if p.hasVoted %}
+                                                {% if p.hasVoted or p.createdBy == user.id %}
                                                 disabled
                                                 {% endif %}
                                                 class="btn btn-danger pull-right voteButton {% if p.hasVoted %}disabled{% endif %}"><i class="icon-white icon-thumbs-down"></i></button>

@@ -9,10 +9,11 @@ use Ariadne\Models\Model;
 
 class Permission extends Model
 {
-    const ADD_FORUM  = 'Add Post';
-    const ADD_THREAD = 'Add Forum';
-    const ADD_POST   = 'Add Post';
-    const VOTE_POST  = 'Vote Post';
+    const ADD_FORUM    = 'Add Post';
+    const ADD_THREAD   = 'Add Forum';
+    const ADD_POST     = 'Add Post';
+    const VOTE_POST    = 'Vote Post';
+    const ACCESS_ADMIN = 'Change Forum Settings';
     
     function getPermissionsByUserID($userID)
     {

@@ -20,6 +20,17 @@ class Post extends Model
         parent::__construct($connection);
     }
     
+    function getPostByID($id)
+    {
+        $query = "SELECT p.id,
+                         p.created_by AS createdBy
+                  FROM posts p
+                  WHERE 1=1
+                  AND p.id = :postID";
+                  
+        return $this->fetch($query, array(':postID' => $id));
+    }
+    
     /**
      * Get all posts based on forum and thread ID
      * @param int $forumID

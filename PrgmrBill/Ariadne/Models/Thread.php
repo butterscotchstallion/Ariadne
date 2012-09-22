@@ -55,11 +55,6 @@ class Thread extends Model
             $direction = self::DIRECTION_DESC;
         }
         
-        // Post count is not an actual column, so don't put that in the query
-        if ($sort == 'postCount') {
-        //    $sort = 'createdAt';
-        }
-        
         $order = sprintf("ORDER BY %s %s", $sort, $direction);
         
         $query = sprintf('SELECT t.id,

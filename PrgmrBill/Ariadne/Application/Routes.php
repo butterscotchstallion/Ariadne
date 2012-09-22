@@ -277,6 +277,18 @@ use($checkPermissions, $canVote, $user)                                         
     $user           = $app['session']->get('user');
     $vote['userID'] = $user['id'];
     
+    // #15 - Users should not be able to vote on their own posts
+    $poster = new Post($app['db']);
+    $post   = $poster->getPostByID($vote['postID']);
+    $postCreatedByUserID = isset($post['createdBy']) ? $post['createdBy'] : 0;
+    
+    // If the current user is trying to vote up their own posts
+    // return an error instead
+    if ($vote['userID'] == $postCreatedByUserID) {
+        return $app->json(array('Status'  => 'ERROR',
+                                'Message' => 'Cannot vote up own posts'));
+    }
+    
     // Validate
     $constraint = new Assert\Collection(array(
         'forumID'   => new Assert\Regex("#\d+#"),
@@ -304,9 +316,6 @@ use($checkPermissions, $canVote, $user)                                         
     $ratingResult = $voter->getVotes($threadID, $vote['postID']);
     $rating       = isset($ratingResult[$vote['postID']]['rating']) ? $ratingResult[$vote['postID']]['rating'] : 0;
     
-    //print_r($ratingResult);
-    //die;
-    
     return $app->json(array('Status' => $status,
                             'Rating' => $rating));
     
@@ -330,8 +339,9 @@ $app->post('/f/{forumID}/t/{threadID}/reply', function(Silex\Application $app, R
         'body' => array(new Assert\NotBlank(), 
                         new Assert\MinLength(POST_MIN_LENGTH),
                         new Assert\MaxLength(POST_MAX_LENGTH)),
-        'forumID'  => new Assert\Regex("#\d+#"),
-        'threadID' => new Assert\Regex("#\d+#"),
+        'forumID'   => new Assert\Regex("#\d+#"),
+        'threadID'  => new Assert\Regex("#\d+#"),
+        'bump'      => new Assert\Regex("#[0,1]?#"),
         'createdBy' => new Assert\Regex("#\d+#"),
     ));
     
@@ -347,10 +357,6 @@ $app->post('/f/{forumID}/t/{threadID}/reply', function(Silex\Application $app, R
     // Quoting another post
     $replaceLink  = sprintf("<a href='/f/%d/t/%d/#post%d'>\\0</a>", $forumID, $threadID, $postID);
     $post['body'] = preg_replace("#^>>(\d+)#", $replaceLink, $post['body']);
-    
-    //echo '<pre>';
-    //print_r($post);
-    //die;
     
     // Proceed
     $p      = new Post($app['db']);
