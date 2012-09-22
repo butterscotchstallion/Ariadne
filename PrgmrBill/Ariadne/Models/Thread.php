@@ -35,23 +35,32 @@ class Thread extends Model
                                      ':createdBy' => $thread['createdBy']));
     }
     
-    function getAll($forumID, $sort = null)
+    function getAll($forumID, 
+                    $sort      = null, 
+                    $direction = self::DIRECTION_DESC)
     {
-        $sortable = array('createdAt',
-                          'createdByUser',
-                          'title',
-                          'postCount');
+        $defaultSort = 'postCount';
+        $sortable    = array('createdAt',
+                             'createdByUser',
+                             'title',
+                             'postCount');
         
         // Invalid sort
         if (!in_array($sort, $sortable)) {
-            $sort = 'postCount';
+            $sort = $defaultSort;
         }
         
-        if ($sort != 'postCount') {
-            $order = sprintf("ORDER BY %s DESC", $sort);
-        } else {
-            $order = '';
+        // Invalid direction
+        if (!in_array($direction, array(self::DIRECTION_DESC, self::DIRECTION_ASC))) {
+            $direction = self::DIRECTION_DESC;
         }
+        
+        // Post count is not an actual column, so don't put that in the query
+        if ($sort == 'postCount') {
+            $sort = 'createdAt';
+        }
+        
+        $order = sprintf("ORDER BY %s %s", $sort, $direction);
         
         $query = sprintf('SELECT t.id,
                                  t.title,
@@ -63,7 +72,10 @@ class Thread extends Model
                           JOIN users u ON u.id = t.created_by
                           WHERE 1=1
                           AND t.forum_id = :forumID
-                          %s', $order);
+                          %s', 
+                          $order);
+        
+        //var_dump($order);
         
         $result = $this->fetchAll($query, array(':forumID' => $forumID));
         
@@ -87,12 +99,13 @@ class Thread extends Model
                 
                 // Thread rating (sum of all votes on posts in this thread)
                 $result[$key]['rating']   = isset($threadRatings[$t['id']]) ? $threadRatings[$t['id']] : 0;
-                 
+                
                 $postCountSort[$key]      = $postCount;
             }
             
             if ($sort == 'postCount') {
-                array_multisort($postCountSort, SORT_DESC, $result, SORT_NUMERIC);
+                $mSort = $direction == self::DIRECTION_DESC ? SORT_DESC : SORT_ASC;
+                array_multisort($postCountSort, $mSort, $result, SORT_NUMERIC);
             }
         }
         

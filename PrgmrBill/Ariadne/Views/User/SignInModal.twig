@@ -1,0 +1,40 @@
+<div class="modal hide fade" id="signInModal">
+    <form method="post" action="/u/sign-in" class="validateMe">
+        <input type="hidden" name="redirectTo" value="{{ currentURI|e }}">
+        
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3>Please Sign In</h3>
+        </div>
+        <div class="modal-body">
+            <div class="control-block">
+                <label class="control-label" for="userName"><i class="icon-user"></i> Username</label>
+                
+                <div class="controls">
+                    <input type="text" 
+                           name="user[name]" 
+                           id="userName" 
+                           maxlength="45"
+                           class="required">
+                </div>
+            </div>
+            
+            <div class="control-block">
+                <label class="control-label" for="userPassword"><i class="icon-lock"></i> Password</label>
+                
+                <div class="controls">
+                    <input type="password" 
+                           name="user[password]" 
+                           id="userPassword" 
+                           maxlength="255"
+                           class="required">
+                </div>
+            </div>
+            
+            <div class="control-block">
+                <button type="submit" class="btn btn-success"><i class="icon-white icon-user"></i> Sign In</button>
+                <button type="button" class="btn" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </form>
+</div>

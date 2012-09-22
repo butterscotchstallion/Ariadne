@@ -121,23 +121,31 @@ $app->post('/f/new', function(Silex\Application $app, Request $req)
   
 // Thread list
 $app->get('/f/{id}', function(Silex\Application $app, Request $req, $id = 0) {
- 
-    $f       = new Forum($app['db']);
-    $forum   = $f->getForumByID($id);
-     
+    $direction = $req->get('dir');
+    $f         = new Forum($app['db']);
+    $forum     = $f->getForumByID($id);
+    
     if (!$forum) {
         $app->abort(404, "Forum does not exist.");
     }
     
     $t       = new Thread($app['db']);
-    $threads = $t->getAll($id, $req->get('sort'));
+    $threads = $t->getAll($id, $req->get('sort'), $direction);
+    
+    // Flip direction
+    if ($direction == Thread::DIRECTION_DESC) {
+        $direction = Thread::DIRECTION_ASC;
+    } else {
+        $direction = Thread::DIRECTION_DESC;
+    }
     
     return $app['twig']->render('Main/Threads.twig', array(
         'forumTitle'  => $forum['title'],
         'forumID'     => $forum['id'],
         'threadID'    => 0,
         'threadTitle' => '',
-        'threads'     => $threads
+        'threads'     => $threads,
+        'dir'         => $direction
     ));
 })->assert('id', "\d+");
 
@@ -400,9 +408,10 @@ $app->get('/u/sign-out', function(Silex\Application $app, Request $req) {
 
 // Authenticate
 $app->post('/u/sign-in', function(Silex\Application $app, Request $req) {
-    $user     = $req->get('user');
-    $name     = isset($user['name'])     ? $user['name']     : '';
-    $password = isset($user['password']) ? $user['password'] : '';
+    $user       = $req->get('user');
+    $name       = isset($user['name'])     ? $user['name']     : '';
+    $password   = isset($user['password']) ? $user['password'] : '';
+    $redirectTo = $req->get('redirectTo');
     
     if ($name && $password) {        
         // Find user
@@ -421,7 +430,12 @@ $app->post('/u/sign-in', function(Silex\Application $app, Request $req) {
                 unset($user['password']);
                 
                 $app['session']->set('user', $user);
-                return $app->redirect(sprintf('/u/%d', $user['id']));
+                
+                if ($redirectTo) {
+                    return $app->redirect($redirectTo);
+                } else {
+                    return $app->redirect(sprintf('/u/%d', $user['id']));
+                }
             } 
         }         
     } 
@@ -450,6 +464,12 @@ $app['twig']->addGlobal('canAddForums', $canAddForums($user['permissions']));
 $app['twig']->addGlobal('canAddThreads', $canAddThreads($user['permissions']));
 $app['twig']->addGlobal('canAddPosts', $canAddPosts($user['permissions']));
 
+// User info
 $app['twig']->addGlobal('user', $app['session']->get('user'));
+
+// Validation messages
 $app['twig']->addGlobal('errors', $app['session']->get('errors'));
 $app['twig']->addGlobal('message', $app['session']->get('message'));
+
+// Misc
+$app['twig']->addGlobal('currentURI', $_SERVER['PHP_SELF']);

@@ -9,6 +9,9 @@ use Ariadne\Application\Sortable;
 
 abstract class Model
 {
+    const DIRECTION_DESC = 'DESC';
+    const DIRECTION_ASC  = 'ASC';
+    
     private $connection;
     
     function __construct($connection)
