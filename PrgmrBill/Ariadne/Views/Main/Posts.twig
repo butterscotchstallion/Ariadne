@@ -34,14 +34,20 @@
                                                 data-thread-id="{{ threadID }}"
                                                 data-forum-id="{{ forumID }}"
                                                 title="This post is awesome"
-                                                class="btn btn-success voteButton"><i class="icon-white icon-thumbs-up"></i></button>
+                                                {% if p.hasVoted %}
+                                                disabled
+                                                {% endif %}
+                                                class="btn btn-success voteButton {% if p.hasVoted %}disabled{% endif %}"><i class="icon-white icon-thumbs-up"></i></button>
                                                
                                         <button data-post-id="{{ p.id }}"
                                                 data-vote-up="-1"
                                                 data-thread-id="{{ threadID }}"
                                                 data-forum-id="{{ forumID }}"
                                                 title="This post sucks"
-                                                class="btn btn-danger pull-right voteButton"><i class="icon-white icon-thumbs-down"></i></button>
+                                                {% if p.hasVoted %}
+                                                disabled
+                                                {% endif %}
+                                                class="btn btn-danger pull-right voteButton {% if p.hasVoted %}disabled{% endif %}"><i class="icon-white icon-thumbs-down"></i></button>
                                     </td></tr>
                                 {% endif %}
                                 

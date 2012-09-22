@@ -51,7 +51,8 @@ $checkPermissions = function($permissionTest, $redirect = '/') use($app, $flash)
     }
 };
 
-$user = $app['session']->get('user') ? $app['session']->get('user') : array('permissions' => array());
+$user   = $app['session']->get('user') ? $app['session']->get('user') : array('permissions' => array());
+$userID = isset($user['id']) ? $user['id'] : 0;
 
 //print_r($user);
 
@@ -220,7 +221,8 @@ $app->post('/f/{forumID}/t/new', function(Silex\Application $app, Request $req, 
   ->before($checkPermissions($canAddThreads($user['permissions']), '/'));
   
 // Post list
-$app->get('/f/{forumID}/t/{threadID}', function(Silex\Application $app, Request $req, $forumID = 0, $threadID = 0) {
+$app->get('/f/{forumID}/t/{threadID}', function(Silex\Application $app, Request $req, $forumID = 0, $threadID = 0) 
+                                       use ($userID) {
     
     $f       = new Forum($app['db']);
     $forum   = $f->getForumByID($forumID);
@@ -237,7 +239,7 @@ $app->get('/f/{forumID}/t/{threadID}', function(Silex\Application $app, Request 
     }
     
     $p       = new Post($app['db']);
-    $posts   = $p->getAll($forumID, $threadID);
+    $posts   = $p->getAll($forumID, $threadID, $userID);
     
     $user    = $p->getOriginalPostUser($forumID, $threadID);
     

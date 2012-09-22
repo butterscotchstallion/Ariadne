@@ -20,7 +20,15 @@ class Post extends Model
         parent::__construct($connection);
     }
     
-    function getAll($forumID, $threadID)
+    /**
+     * Get all posts based on forum and thread ID
+     * @param int $forumID
+     * @param int $threadID
+     * @param int $currentUser - if specified, add a property called hasVoted so we know
+     * whether to disable the vote button
+     *
+     */
+    function getAll($forumID, $threadID, $currentUser)
     {
         $query = 'SELECT p.id,
                          p.body,
@@ -45,14 +53,20 @@ class Post extends Model
                                                ':threadID' => $threadID));
                                                
         if ($posts) {
-            $tags  = $this->tag->getPostTags($threadID);
-            $votes = $this->vote->getVotes($threadID);
-            
-            //print_r($votes);
+            $tags   = $this->tag->getPostTags($threadID);
+            $votes  = $this->vote->getVotes($threadID);
+            $voters = $this->vote->getVotersByThread($threadID);
             
             foreach ($posts as $key => $p) {
+                // Tags for this post
                 $posts[$key]['tags']   = isset($tags[$p['id']]) ? $tags[$p['id']] : array(); 
-                $posts[$key]['rating'] = isset($votes[$p['id']]['rating']) ? $votes[$p['id']]['rating'] : 0; 
+                
+                // Post rating
+                $posts[$key]['rating'] = isset($votes[$p['id']]['rating']) ? $votes[$p['id']]['rating'] : 0;
+                
+                // Determine if current user has voted
+                $voters = isset($voters[$p['id']]) ? $voters[$p['id']] : array();
+                $posts[$key]['hasVoted'] = $currentUser && $voters ? in_array($currentUser, $voters) : false;                
             }
         }
         

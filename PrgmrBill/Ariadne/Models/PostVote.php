@@ -92,4 +92,29 @@ class PostVote extends Model
         
         return $ratings;
     }
+    
+    function getVotersByThread($threadID)
+    {
+        $query = "SELECT pv.user_id AS userID,
+                         pv.post_id AS postID
+                  FROM post_votes pv
+                  WHERE 1=1
+                  AND pv.thread_id = :threadID
+                  GROUP BY postID";
+                  
+        $voters = array();
+        $result = $this->fetchAll($query, array(':threadID' => $threadID));
+        
+        if ($result) {
+            foreach ($result as $key => $v) {
+                if (!isset($voters[$v['postID']])) {
+                    $voters[$v['postID']] = array();
+                }
+                
+                $voters[$v['postID']][] = $v['userID'];
+            }
+        }
+        
+        return $voters;
+    }
 }
