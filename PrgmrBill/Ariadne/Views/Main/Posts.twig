@@ -27,14 +27,14 @@
                                     Rating: <span data-post-rating="{{ p.id }}">{{ p.rating }}</span>
                                 </td></tr>
                                 
-                                {% if signedIn %}
+                                {% if signedIn and p.createdBy != user.id %}
                                     <tr><td colspan="2">
                                         <button data-post-id="{{ p.id }}"
                                                 data-vote-up="1"
                                                 data-thread-id="{{ threadID }}"
                                                 data-forum-id="{{ forumID }}"
                                                 title="This post is awesome"
-                                                {% if p.hasVoted or p.createdBy == user.id %}
+                                                {% if p.hasVoted %}
                                                 disabled
                                                 {% endif %}
                                                 class="btn btn-success voteButton {% if p.hasVoted %}disabled{% endif %}"><i class="icon-white icon-thumbs-up"></i></button>
@@ -44,7 +44,7 @@
                                                 data-thread-id="{{ threadID }}"
                                                 data-forum-id="{{ forumID }}"
                                                 title="This post sucks"
-                                                {% if p.hasVoted or p.createdBy == user.id %}
+                                                {% if p.hasVoted %}
                                                 disabled
                                                 {% endif %}
                                                 class="btn btn-danger pull-right voteButton {% if p.hasVoted %}disabled{% endif %}"><i class="icon-white icon-thumbs-down"></i></button>

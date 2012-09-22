@@ -278,8 +278,11 @@ use($checkPermissions, $canVote, $user)                                         
     $vote['userID'] = $user['id'];
     
     // #15 - Users should not be able to vote on their own posts
-    $poster = new Post($app['db']);
-    $post   = $poster->getPostByID($vote['postID']);
+    $poster              = new Post($app['db']);
+    $post                = $poster->getPostByID($vote['postID']);
+    
+    // In the case that this post isn't found, it will be zero and
+    // fail validation below
     $postCreatedByUserID = isset($post['createdBy']) ? $post['createdBy'] : 0;
     
     // If the current user is trying to vote up their own posts
@@ -291,10 +294,10 @@ use($checkPermissions, $canVote, $user)                                         
     
     // Validate
     $constraint = new Assert\Collection(array(
-        'forumID'   => new Assert\Regex("#\d+#"),
-        'userID'    => new Assert\Regex("#\d+#"),
-        'postID'    => new Assert\Regex("#\d+#"),
-        'threadID'  => new Assert\Regex("#\d+#"),
+        'forumID'   => new Assert\Regex("#[1-9]+#"),
+        'userID'    => new Assert\Regex("#[1-9]+#"),
+        'postID'    => new Assert\Regex("#[1-9]+#"),
+        'threadID'  => new Assert\Regex("#[1-9]+#"),
         'up'        => new Assert\Regex("#[-1,1]#")
     ));
     
