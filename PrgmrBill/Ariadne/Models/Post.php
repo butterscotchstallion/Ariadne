@@ -169,6 +169,10 @@ class Post extends Model
         $isFirstPost = isset($post['isFirstPost']) ? $post['isFirstPost'] : 0;
         $bump        = isset($post['bump']) ? (int) $post['bump'] : 0;
         
+        if (!in_array($bump, array(0, 1))) {
+            $bump = 1;
+        }
+        
         return $this->save($q, array(':forumID'     => $post['forumID'],
                                      ':threadID'    => $post['threadID'],
                                      ':createdBy'   => $post['createdBy'],

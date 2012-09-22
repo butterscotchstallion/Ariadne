@@ -57,7 +57,7 @@ class Thread extends Model
         
         // Post count is not an actual column, so don't put that in the query
         if ($sort == 'postCount') {
-            $sort = 'createdAt';
+        //    $sort = 'createdAt';
         }
         
         $order = sprintf("ORDER BY %s %s", $sort, $direction);
@@ -67,45 +67,31 @@ class Thread extends Model
                                  t.created_at AS createdAt,
                                  u.name AS createdByUser,
                                  u.id AS createdBy,
-                                 t.forum_id AS forumID
+                                 t.forum_id AS forumID,
+                                 (SELECT COUNT(*) AS postCount 
+                                  FROM posts p 
+                                  WHERE p.thread_id = t.id) as postCount
                           FROM threads t
                           JOIN users u ON u.id = t.created_by
                           WHERE 1=1
                           AND t.forum_id = :forumID
+                          GROUP BY t.id
                           %s', 
                           $order);
-        
-        //var_dump($order);
         
         $result = $this->fetchAll($query, array(':forumID' => $forumID));
         
         if ($result) {
-            // Lookup array of all post counts
-            $postCounts    = $this->post->getPostCounts();
-            $postCountSort = array();
-            
             // Latest posts
             $latestPosts   = $this->post->getLatestPostsFromThreads($forumID);
             $threadRatings = $this->vote->getThreadRatings();
             
             foreach ($result as $key => $t) {
-                // If this value is set, there is at least one post
-                // If not, there are no posts in that thread
-                $postCount = isset($postCounts[$t['id']]) ? $postCounts[$t['id']] : 0;
-                $result[$key]['postCount'] = $postCount;
-                
                 // Last post
                 $result[$key]['lastPost'] = isset($latestPosts[$t['id']]) ? $latestPosts[$t['id']] : array();
                 
                 // Thread rating (sum of all votes on posts in this thread)
                 $result[$key]['rating']   = isset($threadRatings[$t['id']]) ? $threadRatings[$t['id']] : 0;
-                
-                $postCountSort[$key]      = $postCount;
-            }
-            
-            if ($sort == 'postCount') {
-                $mSort = $direction == self::DIRECTION_DESC ? SORT_DESC : SORT_ASC;
-                array_multisort($postCountSort, $mSort, $result, SORT_NUMERIC);
             }
         }
         

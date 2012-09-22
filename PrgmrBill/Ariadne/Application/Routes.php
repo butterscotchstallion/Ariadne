@@ -332,7 +332,6 @@ $app->post('/f/{forumID}/t/{threadID}/reply', function(Silex\Application $app, R
                         new Assert\MaxLength(POST_MAX_LENGTH)),
         'forumID'  => new Assert\Regex("#\d+#"),
         'threadID' => new Assert\Regex("#\d+#"),
-        'bump'     => new Assert\Regex("#[0,1]#"),
         'createdBy' => new Assert\Regex("#\d+#"),
     ));
     
